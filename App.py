@@ -1,11 +1,8 @@
-from typing import Optional
-from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-import pysftp
-import base64
-from io import StringIO
+import cv2
+import shutil
 
 
 app = FastAPI()
@@ -39,13 +36,17 @@ def read_item(Item: CredItem):
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
-    contents = await file.read()
-    VideoFile = base64.b64encode(contents)
-    cnopts = pysftp.CnOpts()
-    cnopts.hostkeys = None  
-    with pysftp.Connection('63.142.254.143', username='root', password='mysportseat@84484', cnopts=cnopts) as sftp:
-        f = sftp.open(f'/root/VideoUpload/{file.filename}', 'wb')
-        f.write(VideoFile)
-        sftp.close()
+    # contents = await file.read()
+    # VideoFile = base64.b64encode(contents)
+    # cnopts = pysftp.CnOpts()
+    # cnopts.hostkeys = None
+    # with pysftp.Connection('63.142.254.143', username='root', password='mysportseat@84484', cnopts=cnopts) as sftp:
+    #     f = sftp.open(f'/root/VideoUpload/{file.filename}', 'wb')
+    #     f.write(VideoFile)
+    #     sftp.close()
+    path = f"C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/VideoRedact/UploadedVideos/{file.filename}"
+
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
     return {"filename": file.filename}
