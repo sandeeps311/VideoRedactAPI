@@ -1,3 +1,5 @@
+import math
+
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -115,8 +117,11 @@ def upload_detectface(Item:detectfaceitem):
                 if confidence > 0.5:
                     # compute the (x, y)-coordinates of the bounding box for
                     # the object
-                    count += 1
+                    count += 10
+                    vs.set( 1, count )
                     frametime = count / fps
+                    # print( math.ceil( frametime * 100 ) / 100 )
+                    # list.append( math.ceil( frametime * 100 ) / 100 )
 
 
 
@@ -130,11 +135,11 @@ def upload_detectface(Item:detectfaceitem):
                     # cv2.imshow( 'test', face )
                     # print(startY)
 
-                    cv2.imwrite( r'E:/VideoProject/images/' + str( frametime ) + '.png', face )
+                    cv2.imwrite( r'E:/VideoProject/images/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png', face )
                     data = {
-                        "object":'E:/VideoProject/images/' + str( frametime ) + '.png',
-                        "time":frametime,
-                        "auto":None,
+                        "object":'E:/VideoProject/images/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png',
+                        "time":math.ceil( frametime * 100 ) / 100,
+                        "auto":True,
                         "Manual":None
 
                     }
@@ -166,6 +171,9 @@ def upload_detectface(Item:detectfaceitem):
             # # if the `q` key was pressed, break from the loop
             # if key == ord( "q" ):
             #     break
+            count += 10  # i.e. at 30 fps, this advances one second
+            vs.set( 1, count )
+            frametime = count / fps
             print( list )
         except:
             print( 'error' )
