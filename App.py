@@ -1,12 +1,11 @@
 import math
-
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import shutil
 import datetime
-
+import uuid
 import cv2
 import imutils
 import numpy as np
@@ -67,7 +66,7 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 
 @app.post("/detecthead/")
-def upload_detectface(Item:detectfaceitem):
+async def upload_detectface(Item:detectfaceitem):
     path=Item.path
     vs = cv2.VideoCapture( path )
     frame_width = int( vs.get( 3 ) )
@@ -123,24 +122,23 @@ def upload_detectface(Item:detectfaceitem):
                     # print( math.ceil( frametime * 100 ) / 100 )
                     # list.append( math.ceil( frametime * 100 ) / 100 )
 
-
-
-                    print( "time stamp current frame:", count / fps )
+                    # print( "time stamp current frame:", count / fps )
 
                     box = detections[0, 0, i, 3:7] * np.array( [w, h, w, h] )
                     (startX, startY, endX, endY) = box.astype( "int" )
 
                     # extract the face ROI
                     face = frame[startY:endY, startX:endX]
-                    # cv2.imshow( 'test', face )
-                    # print(startY)
 
-                    cv2.imwrite( r'E:/VideoProject/images/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png', face )
+                    resized = cv2.resize(face, (36, 44), interpolation=cv2.INTER_AREA)
+
+                    cv2.imwrite( r'C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/GitProject/VideoRedact/public/assets/header_img/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png', resized )
                     data = {
-                        "object":'E:/VideoProject/images/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png',
-                        "time":math.ceil( frametime * 100 ) / 100,
-                        "auto":True,
-                        "Manual":None
+                        "id": uuid.uuid4(),
+                        "object": 'C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/GitProject/VideoRedact/public/assets/header_img/' + str( math.ceil( frametime * 100 ) / 100 ) + '.png',
+                        "time": math.ceil( frametime * 100 ) / 100,
+                        "auto": True,
+                        "Manual": None
 
                     }
                     list.append( data )
@@ -173,8 +171,8 @@ def upload_detectface(Item:detectfaceitem):
             #     break
             count += 10  # i.e. at 30 fps, this advances one second
             vs.set( 1, count )
-            frametime = count / fps
-            print( list )
+            # frametime = count / fps
+            # print( list )
         except:
             print( 'error' )
             break
