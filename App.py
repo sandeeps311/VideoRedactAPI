@@ -1,8 +1,6 @@
-import math
-from pydantic import BaseModel
+import math, json, time
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-import cv2
 import shutil
 import datetime
 import uuid
@@ -10,6 +8,15 @@ import cv2
 import imutils
 import numpy as np
 from FaceDetection.pyimagesearch.face_blurring import anonymize_face_simple, anonymize_face_pixelate
+import subprocess
+import speech_recognition as sr
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
+from models import models
+import boto3
+from botocore.exceptions import ClientError
+# import face_recognition
+
+
 
 prototxtPath = 'FaceDetection/face_detector/deploy.prototxt'
 weightsPath = 'FaceDetection/face_detector/res10_300x300_ssd_iter_140000.caffemodel'
@@ -29,45 +36,90 @@ app.add_middleware(
 )
 
 
-class CredItem(BaseModel):
-    username: str
-    password: str
-class detectfaceitem(BaseModel):
-    path: str
-
 @app.get("/")
 def read_root():
     return {"Hello": "This is home"}
 
 
-@app.post("/login")
-def read_item(Item: CredItem):
-    username = Item.username
-    password = Item.password
-    return {"username": username, "password": password}
-
-
-@app.post("/uploadfile/")
+@app.post("/uploadfile")
 async def create_upload_file(file: UploadFile = File(...)):
-    # contents = await file.read()
-    # VideoFile = base64.b64encode(contents)
-    # cnopts = pysftp.CnOpts()
-    # cnopts.hostkeys = None
-    # with pysftp.Connection('63.142.254.143', username='root', password='mysportseat@84484', cnopts=cnopts) as sftp:
-    #     f = sftp.open(f'/root/VideoUpload/{file.filename}', 'wb')
-    #     f.write(VideoFile)
-    #     sftp.close()
-    path = f"C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/VideoRedact/UploadedVideos/{file.filename}"
+    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
+    Aws_secret_access_key = '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'
 
+    bucketName = 'original-video'
+
+    region = 'us-east-2'
+
+    # s3_client = boto3.resource(
+    #         service_name='s3',
+    #         region_name=region,
+    #         aws_access_key_id=Aws_access_key_id,
+    #         aws_secret_access_key=Aws_secret_access_key
+    #     )
+
+    s3 = boto3.client('s3',
+                      aws_access_key_id=Aws_access_key_id,
+                      aws_secret_access_key=Aws_secret_access_key,
+                      )
+
+    # for bucket in s3_client.buckets.all():
+    #     print(bucket.name)
+
+    with open('videoData.json') as f:
+        data = json.load(f)
+
+    # print(data)
+    #
+    path = f"C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/GitProject/VideoRedact/public/assets/UploadedVideo/{file.filename}"
+    #
     with open(path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {"filename": file.filename}
+    # s3_client.Bucket('original-video').upload_file(Filename=path, Key=file.filename)
+
+    try:
+        upload_response = s3.upload_file(path, 'original-video', file.filename)
+        print(upload_response)
+    except ClientError as e:
+        print(e)
+
+    # for obj in s3_client.Bucket('original-video').objects.all():
+    #     print(obj)
+
+    response = s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={'Bucket': 'original-video', 'Key': file.filename},
+        ExpiresIn=3600,
+    )
+
+    print(response)
 
 
-@app.post("/detecthead/")
-async def upload_detectface(Item:detectfaceitem):
-    path=Item.path
+    videoData = {
+            "id": str(uuid.uuid4()),
+            "user_id": "user_id",
+            "video_name": "Motivation video",
+            "video_url": response,
+            "upload_datetime": str(datetime.datetime.now()),
+            "thumbnail": "./assets/VideoCover/videocover1.png",
+            "is_head_detect": True,
+            "is_transcription": True,
+            "is_edited": False,
+            "is_download": False,
+            "message": "success"
+        }
+    data.append(videoData)
+
+    with open('videoData.json', 'w') as f:
+        json.dump(data, f)
+
+    return upload_response
+
+
+@app.post("/detecthead")
+def upload_detectface(item: models.detectfaceitem):
+    path = item.path
+    print(path)
     vs = cv2.VideoCapture( path )
     frame_width = int( vs.get( 3 ) )
     frame_height = int( vs.get( 4 ) )
@@ -83,6 +135,7 @@ async def upload_detectface(Item:detectfaceitem):
     video_time = str( datetime.timedelta( seconds=seconds ) )
     print( video_time )
     list = []
+    AllList = []
     size = (frame_width, frame_height)
     result = cv2.VideoWriter( 'filename.avi',
                               cv2.VideoWriter_fourcc( *'MJPG' ),
@@ -119,11 +172,6 @@ async def upload_detectface(Item:detectfaceitem):
                     count += 10
                     vs.set( 1, count )
                     frametime = count / fps
-                    # print( math.ceil( frametime * 100 ) / 100 )
-                    # list.append( math.ceil( frametime * 100 ) / 100 )
-
-                    # print( "time stamp current frame:", count / fps )
-
                     box = detections[0, 0, i, 3:7] * np.array( [w, h, w, h] )
                     (startX, startY, endX, endY) = box.astype( "int" )
 
@@ -148,7 +196,6 @@ async def upload_detectface(Item:detectfaceitem):
                     # blurring method
                     if 'simple' == "simple":
                         face = anonymize_face_simple( face, factor=3.0 )
-
                     # otherwise, we must be applying the "pixelated" face
                     # anonymization method
                     else:
@@ -158,21 +205,8 @@ async def upload_detectface(Item:detectfaceitem):
                     # store the blurred face in the output image
                     frame[startY:endY, startX:endX] = face
 
-            # show the output frame
-
-            # result.write( frame )
-            # cv2.imshow( "Frame", frame )
-            # key = cv2.waitKey( 1 ) & 0xFF
-            # if key == 'p':
-            #     cv2.waitKey()
-            # #
-            # # if the `q` key was pressed, break from the loop
-            # if key == ord( "q" ):
-            #     break
             count += 10  # i.e. at 30 fps, this advances one second
             vs.set( 1, count )
-            # frametime = count / fps
-            # print( list )
         except:
             print( 'error' )
             break
@@ -181,6 +215,116 @@ async def upload_detectface(Item:detectfaceitem):
     vs.release()
     result.release()
     cv2.destroyAllWindows()
-    # print(list)
-    return list
 
+    # subprocess.run(f"C:/Users/Ajinkya/Desktop/All Data/Recovered data 01-07 07_46_29/GitProject/VideoRedactAPI/ffmpeg-N-100581-ga454a0c14f-win64-gpl-shared-vulkan/bin/ffmpeg.exe -i test-1_2.mp4 -vn audio_only.wav")
+
+    ffmpeg_extract_audio(path, "test.wav", bitrate=3000, fps=44100)
+
+    framerate = 0.1
+
+    r = sr.Recognizer()
+    with sr.AudioFile("test.wav") as source:
+        # reads the audio file. Here we use record instead of
+        # listen
+        audio = r.record(source)
+
+        # decoder = r.recognize_sphinx(audio, show_all=False)
+        #
+        # print([(seg.word, seg.start_frame / framerate) for seg in decoder.seg()])
+
+    try:
+        print("The audio file contains: " + r.recognize_google(audio))
+        transcript = r.recognize_google(audio)
+        videoData = {
+            "id": uuid.uuid4(),
+            "faces": list,
+            "transcript": transcript,
+            "editedVideoPath": ""
+        }
+
+    except sr.UnknownValueError:
+        print("Google Speech Recognition could not understand audio")
+        videoData = {
+            "id": uuid.uuid4(),
+            "faces": list,
+            "transcript": "Google Speech Recognition could not understand audio",
+            "editedVideoPath": "",
+        }
+
+    except sr.RequestError as e:
+        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        videoData = {
+            "id": uuid.uuid4(),
+            "faces": list,
+            "transcript": "Could not request results from Google Speech Recognition service; {0}".format(e),
+            "editedVideoPath": ""
+        }
+
+    # AllList.append(videoData)
+
+    # with open('FaceData.json') as file:
+    #     file.write(AllList)
+
+
+    return videoData
+
+@app.post("/redactfaces")
+async def redact_face_audio(item: models.redactfaceitem):
+    print(item.data)
+    time.sleep(5)
+    return {"message": "success"}
+
+@app.get("/myAllVideos/{user_id}")
+def myAllVideos(user_id: str):
+    time.sleep(2)
+    if user_id == "abc":
+        # data = [
+        #     {
+        #         "id": uuid.uuid4(),
+        #         "user_id": user_id,
+        #         "video_name": "RRR Trailer",
+        #         "video_url": "./assets/UploadedVideo/rrr.mp4",
+        #         "upload_datetime": datetime.datetime.now(),
+        #         "thumbnail": "./assets/VideoCover/videocover.png",
+        #         "is_head_detect": True,
+        #         "is_transcription": True,
+        #         "is_edited": True,
+        #         "is_download": True,
+        #         "message": "processing"
+        #     },
+        #     {
+        #         "id": uuid.uuid4(),
+        #         "user_id": user_id,
+        #         "video_name": "Motivation video",
+        #         "video_url": "./assets/UploadedVideo/test-1_4.mp4",
+        #         "upload_datetime": datetime.datetime.now(),
+        #         "thumbnail": "./assets/VideoCover/videocover1.png",
+        #         "is_head_detect": True,
+        #         "is_transcription": True,
+        #         "is_edited": True,
+        #         "is_download": True,
+        #         "message": "success"
+        #     }
+        # ]
+
+        with open('videoData.json') as f:
+            data = json.load(f)
+
+        return data
+    else:
+        data = [
+            {
+                "message": "Invalid user"
+            }
+        ]
+        return data
+
+
+@app.post('/getFaceData')
+def get_face_data(item: models.redactfaceitem):
+    time.sleep(2)
+    print(item.data)
+    with open('FaceData.json') as f:
+        data = json.load(f)
+
+    return data
