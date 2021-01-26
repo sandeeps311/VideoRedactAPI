@@ -7,7 +7,6 @@ import boto3
 import cv2
 import face_recognition
 import requests
-from botocore.exceptions import ClientError
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -206,7 +205,7 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
 
     try:
         s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
-    except ClientError as e:
+    except Exception as e:
         print(e)
     try:
         for images in os.listdir('Media/unique'):
