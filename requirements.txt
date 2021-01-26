@@ -2,6 +2,5 @@ python-multipart
 bleedfacedetector
 boto3
 opencv-python
-face_recognition
-requests
+face-recognition
 fastapi
