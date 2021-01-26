@@ -4,3 +4,4 @@ boto3
 opencv-python
 face-recognition
 fastapi
+requests
