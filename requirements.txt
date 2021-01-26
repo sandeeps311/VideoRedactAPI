@@ -6,3 +6,5 @@ face-recognition
 fastapi
 requests
 uvicorn
+pydantic
+gunicorn
