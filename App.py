@@ -7,7 +7,7 @@ import boto3
 import cv2
 import face_recognition
 import requests, sys
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -159,9 +159,7 @@ def getUniqueface(videopath):
         shutil.rmtree( 'Media/converted' )
     except:
         print('go ahead')
-
-
-def uploadBlobToAWS(path, user_id, videoid):
+        
     try:
         s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
     except Exception as e:
@@ -172,13 +170,21 @@ def uploadBlobToAWS(path, user_id, videoid):
     except:
         print('error')
         
+    shutil.rmtree('Media/unique')
+    if os.path.exists( path ):
+        os.remove( path )
+
+
+# def uploadBlobToAWS(path, user_id, videoid):
+    
+        
 @app.get("/")
 def read_root():
     return {"Hello": "This is home"}
 
 
 @app.post("/uploadfile")
-async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(...)):
+async def create_upload_file(file: UploadFile = File(...), user_id: str = Form(...), background_tasks: BackgroundTasks):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
 
@@ -228,14 +234,12 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
 
-    getUniqueface(f'Media/{file.filename}')
+    background_tasks.add_task(getUniqueface, f'Media/{file.filename}')
     
-    uploadBlobToAWS(path, user_id, videoid)
+#     uploadBlobToAWS(path, user_id, videoid)
 
     
-    shutil.rmtree('Media/unique')
-    if os.path.exists( path ):
-        os.remove( path )
+    
 
     videoData={ "message": "Sucess",
                 "data": response_op,
