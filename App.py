@@ -135,7 +135,7 @@ def getUniqueface(videopath):
                 #break
 
         vs.release()
-        #cv2.destroyAllWindows()
+        cv2.destroyAllWindows()
 
 
 
