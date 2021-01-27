@@ -160,6 +160,18 @@ async def getUniqueface(videopath):
     except:
         print('go ahead')
 
+
+def uploadBlobToAWS(path, user_id, videoid):
+    try:
+        s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
+    except Exception as e:
+        print(e)
+    try:
+        for images in os.listdir('Media/unique'):
+            s3.upload_file( path, 'original-video', user_id + f'/faces/{videoid}/{images}' )
+    except:
+        print('error')
+        
 @app.get("/")
 def read_root():
     return {"Hello": "This is home"}
@@ -217,16 +229,10 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
 
 
     await getUniqueface(f'Media/{file.filename}')
+    
+    uploadBlobToAWS(path, user_id, videoid)
 
-    try:
-        s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
-    except Exception as e:
-        print(e)
-    try:
-        for images in os.listdir('Media/unique'):
-            s3.upload_file( path, 'original-video', user_id + f'/faces/{videoid}/{images}' )
-    except:
-        print('error')
+    
     shutil.rmtree('Media/unique')
     if os.path.exists( path ):
         os.remove( path )
