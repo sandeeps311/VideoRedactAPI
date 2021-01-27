@@ -131,11 +131,11 @@ def getUniqueface(videopath):
             count += 5  # i.e. at 30 fps, this advances one second
             vs.set( 1, count )
             fps = (1.0 / (time.time() - start_time))
-            if cv2.waitKey( 1 ) == ord( 'q' ):
-                break
+            #if cv2.waitKey( 1 ) == ord( 'q' ):
+                #break
 
         vs.release()
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
 
 
 
