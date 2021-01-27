@@ -91,8 +91,11 @@ def compare_images():
     except Exception as error:
         print(Errorlines(error))
 
-def getUniqueface(videopath, user_id, video_id):
-
+def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
+    try:
+        s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{videofilename}')
+    except Exception as e:
+        print(e)
     try:
         vs = cv2.VideoCapture(videopath)
 
@@ -159,17 +162,37 @@ def getUniqueface(videopath, user_id, video_id):
         shutil.rmtree( 'Media/converted' )
     except:
         print('go ahead')
-        
+
     try:
         s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{file.filename}')
-    except Exception as e:
-        print(e)
-    try:
+    # except Exception as e:
+    #     print(e)
+    # try:
         for images in os.listdir('Media/unique'):
             s3.upload_file( images, 'original-video', user_id + f'/faces/{videoid}/{images}' )
-    except:
-        print('error')
-        
+
+        body = {
+            "data_id": 68,
+            "video_id": video_id,
+            "message": "Video upload success"
+        }
+        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+                             headers=headers)
+        print(data.text)
+    except Exception as e:
+        print(e)
+        body = {
+            "data_id": 68,
+            "video_id": video_id,
+            "message": "Video upload error"
+        }
+        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+                             headers=headers)
+        print(data.text)
+
+
     shutil.rmtree('Media/unique')
     if os.path.exists( path ):
         os.remove( path )
@@ -205,9 +228,12 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     with open(path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    body={"data_id":68,
-            "video_name":file.filename,
-            "video_url":"response_url"}
+    body = {
+        "data_id": 68,
+        "video_name": file.filename,
+        "video_url": "response_url",
+        "message": "Video uploading"
+    }
     headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
     data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/add_video/{user_id}',data=body,headers=headers)
     print(data.text)
@@ -232,7 +258,7 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
 
-    background_tasks.add_task(getUniqueface, f'Media/{file.filename}', user_id, videoid)
+    background_tasks.add_task(getUniqueface, f'Media/{file.filename}', user_id, videoid, path, s3, file.filename)
     
 #     uploadBlobToAWS(path, user_id, videoid)
 
@@ -469,11 +495,20 @@ def get_video_data(user_id: str, video_id: str):
                       aws_secret_access_key=Aws_secret_access_key,
                       )
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-    response_data = requests.get(
-        f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
-        headers=Headers
-    )
-    response_data = json.loads(response_data.text)
+
+    message = ""
+    response_data = {}
+
+    while message == None or message == "" or message == "Video uploading":
+        time.sleep(2)
+        response_data = requests.get(
+            f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
+            headers=Headers
+        )
+        response_data = json.loads(response_data.text)
+
+        message = response_data['response'][0]['message']
+
     videoID = response_data['response'][0]['video_id']
     videoName = response_data['response'][0]['video_name']
 
