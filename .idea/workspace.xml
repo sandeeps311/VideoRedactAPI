@@ -6,21 +6,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34892733-28b4-42cc-bc5d-eab352691ccf" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/checkfiles.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/video_redact_api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/video_redact_api.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/App.py" beforeDir="false" afterPath="$PROJECT_DIR$/App.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Eligibility.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EligibilityData.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/EligibilityNew.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ForTest.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/filename.avi" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-1-2.mp3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-1-2.wav" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-1_2.mp4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.wav" beforeDir="false" />
     </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,6 +42,18 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ajinkya\Desktop\All Data\Recovered data 01-07 07_46_29\GitProject\VideoRedactAPI" />
     </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
   </component>
   <component name="RunManager" selected="Python.checkfiles">
     <configuration name="EligibilityData" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -102,7 +105,7 @@
       </list>
     </recent_temporary>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SpellCheckerSettings" BundledDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -146,17 +149,13 @@
         </entry>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
     </option>
-    <option name="OPEN_GENERIC_TABS">
-      <map>
-        <entry key="1" value="TOOL_WINDOW" />
-      </map>
-    </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state width="1345" height="128" key="GridCell.Tab.0.bottom" timestamp="1611686404070">

@@ -91,7 +91,7 @@ def compare_images():
     except Exception as error:
         print(Errorlines(error))
 
-def getUniqueface(videopath="", user_id="", video_id=""):
+def getUniqueface(videopath, user_id, video_id):
 
     try:
         vs = cv2.VideoCapture(videopath)
@@ -161,12 +161,12 @@ def getUniqueface(videopath="", user_id="", video_id=""):
         print('go ahead')
         
     try:
-        s3.upload_file(videopath, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
+        s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{file.filename}')
     except Exception as e:
         print(e)
     try:
         for images in os.listdir('Media/unique'):
-            s3.upload_file( videopath, 'original-video', user_id + f'/faces/{videoid}/{images}' )
+            s3.upload_file( images, 'original-video', user_id + f'/faces/{videoid}/{images}' )
     except:
         print('error')
         
@@ -184,7 +184,7 @@ def read_root():
 
 
 @app.post("/uploadfile")
-async def create_upload_file(file: UploadFile = File(...), user_id: str = Form(...), background_tasks: BackgroundTasks):
+async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...), user_id: str = Form(...)):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
 
@@ -209,7 +209,7 @@ async def create_upload_file(file: UploadFile = File(...), user_id: str = Form(.
             "video_name":file.filename,
             "video_url":"response_url"}
     headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-    data=requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/add_video/{user_id}',data=body,headers=headers)
+    data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/add_video/{user_id}',data=body,headers=headers)
     print(data.text)
     response_op=json.loads(data.text)
     # getUniqueface(path)
@@ -219,9 +219,7 @@ async def create_upload_file(file: UploadFile = File(...), user_id: str = Form(.
 
     bucket_name = 'original-video'
     if 'Contents' in bucket:
-        if any( d['Key'] == str(user_id) for d in  bucket.get('Contents') )==False:
-
-
+        if not any(d['Key'] == str(user_id) for d in bucket.get('Contents')):
             s3.put_object( Bucket=bucket_name, Key=(user_id + '/video/') )
             s3.put_object( Bucket=bucket_name, Key=(user_id + '/faces/') )
     else:
@@ -234,14 +232,11 @@ async def create_upload_file(file: UploadFile = File(...), user_id: str = Form(.
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
 
-    background_tasks.add_task(getUniqueface, f'Media/{file.filename}')
+    background_tasks.add_task(getUniqueface, f'Media/{file.filename}', user_id, videoid)
     
 #     uploadBlobToAWS(path, user_id, videoid)
 
-    
-    
-
-    videoData={ "message": "Sucess",
+    videoData = { "message": "Sucess",
                 "data": response_op,
                 }
 
@@ -491,13 +486,13 @@ def get_video_data(user_id: str, video_id: str):
     List_object = s3.list_objects( Bucket='original-video', Prefix=f'{user_id}/faces/{videoID}/' )
 
     if 'Contents' in List_object:
-        print('%###################################################3')
-        print(List_object['Contents'])
-        print( '%###################################################3' )
+        # print('%###################################################3')
+        # print(List_object['Contents'])
+        # print( '%###################################################3' )
         for item in List_object['Contents']:
-            print( '%###################################################3' )
-            print(item)
-            print( '%###################################################3' )
+            # print( '%###################################################3' )
+            # print(item)
+            # print( '%###################################################3' )
             face_url = s3.generate_presigned_url(
                 ClientMethod='get_object',
                 Params={'Bucket': 'original-video', 'Key': item['Key']},
