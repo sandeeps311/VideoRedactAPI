@@ -8,3 +8,4 @@ requests
 uvicorn
 pydantic
 gunicorn
+uvloop
