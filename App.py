@@ -30,8 +30,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def Errorlines(error):
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    fname = os.path.split( exc_tb.tb_frame.f_code.co_filename )[1]
+    error = "Exception occured :- " + str( error ) + str(
+        exc_type ) + str( fname ), str( exc_tb.tb_lineno )
+    print(error)
 
-def get_uniqueimage():
+async def get_uniqueimage():
     try:
         if os.path.exists( 'Media/unique'):
             print( 'find' )
@@ -52,7 +58,7 @@ def get_uniqueimage():
                 #     shutil.rmtree(subdir)
                 #     break
 
-def compare_images():
+async def compare_images():
     i = 0
     try:
         for img in os.listdir(r"Media/faces"):
@@ -70,19 +76,19 @@ def compare_images():
                         if not os.path.exists('Media/converted'):
                             os.mkdir('Media/converted')
                         if os.path.exists('Media/converted/'+str(i)):
-                            print('sande')
+                            print('sub dir in Media/converted')
                         else:
                             os.makedirs('Media/converted/'+str(i))
                         if results[0] == True:
                             os.rename('Media/faces/'+image,r'Media/converted/'+str(i)+'/'+image)
                 except Exception as error:
-                    print(error)
+                    print(Errorlines(error))
 
                     i = i + 1
                     continue
             except:continue
     except Exception as error:
-        print(error)
+        print(Errorlines(error))
 
 async def getUniqueface(videopath):
 
@@ -126,7 +132,8 @@ async def getUniqueface(videopath):
                     #
                     # img[y:y + h, x:x + w] = face
                     # cv2.putText(img,'Face Detected',(x,y+h+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2, cv2.LINE_AA)
-                except:
+                except Exception as error:
+                    print(Errorlines(error))
                     continue
             count += 5  # i.e. at 30 fps, this advances one second
             vs.set( 1, count )
@@ -141,12 +148,12 @@ async def getUniqueface(videopath):
 
     except Exception as e:
         print(e)
-    compare_images()
+    await compare_images()
     try:
         shutil.rmtree( 'Media/faces' )
     except:
         print('go ahead')
-    get_uniqueimage()
+    await get_uniqueimage()
     try:
         shutil.rmtree( 'Media/converted' )
     except:
