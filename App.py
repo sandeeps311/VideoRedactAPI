@@ -169,7 +169,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
     #     print(e)
     # try:
         for images in os.listdir('Media/unique'):
-            s3.upload_file( images, 'original-video', user_id + f'/faces/{video_id}/{images}' )
+            s3.upload_file( f'Media/unique/{images}', 'original-video', user_id + f'/faces/{video_id}/{images}' )
 
         body = {
             "data_id": 68,
