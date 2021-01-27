@@ -37,7 +37,7 @@ def Errorlines(error):
         exc_type ) + str( fname ), str( exc_tb.tb_lineno )
     print(error)
 
-async def get_uniqueimage():
+def get_uniqueimage():
     try:
         if os.path.exists( 'Media/unique'):
             print( 'find' )
@@ -58,7 +58,7 @@ async def get_uniqueimage():
                 #     shutil.rmtree(subdir)
                 #     break
 
-async def compare_images():
+def compare_images():
     i = 0
     try:
         for img in os.listdir(r"Media/faces"):
@@ -149,12 +149,12 @@ async def getUniqueface(videopath):
 
     except Exception as e:
         print(Errorlines(e))
-    await compare_images()
+    compare_images()
     try:
         shutil.rmtree( 'Media/faces' )
     except:
         print('go ahead')
-    await get_uniqueimage()
+    get_uniqueimage()
     try:
         shutil.rmtree( 'Media/converted' )
     except:
