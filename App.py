@@ -91,7 +91,7 @@ def compare_images():
     except Exception as error:
         print(Errorlines(error))
 
-def getUniqueface(videopath):
+def getUniqueface(videopath="", user_id="", video_id=""):
 
     try:
         vs = cv2.VideoCapture(videopath)
@@ -161,12 +161,12 @@ def getUniqueface(videopath):
         print('go ahead')
         
     try:
-        s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
+        s3.upload_file(videopath, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
     except Exception as e:
         print(e)
     try:
         for images in os.listdir('Media/unique'):
-            s3.upload_file( path, 'original-video', user_id + f'/faces/{videoid}/{images}' )
+            s3.upload_file( videopath, 'original-video', user_id + f'/faces/{videoid}/{images}' )
     except:
         print('error')
         
