@@ -2,7 +2,7 @@ python-multipart
 dlib
 bleedfacedetector
 boto3
-opencv-python
+opencv-python-headless
 face-recognition
 fastapi
 requests
