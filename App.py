@@ -86,7 +86,8 @@ async def compare_images():
 
                     i = i + 1
                     continue
-            except:continue
+            except Exception as error:
+                print(Errorlines(error))
     except Exception as error:
         print(Errorlines(error))
 
@@ -147,7 +148,7 @@ async def getUniqueface(videopath):
 
 
     except Exception as e:
-        print(e)
+        print(Errorlines(e))
     await compare_images()
     try:
         shutil.rmtree( 'Media/faces' )
