@@ -484,7 +484,7 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
 
 
 @app.get('/getVideoData/{user_id}')
-def get_video_data(user_id: str, video_id: str):
+async def get_video_data(user_id: str, video_id: str):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
     # bucketName = 'original-video'
@@ -500,7 +500,7 @@ def get_video_data(user_id: str, video_id: str):
     response_data = {}
 
     while message == None or message == "" or message == "Video uploading":
-        time.sleep(2)
+        # time.sleep(2)
         response_data = requests.get(
             f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
             headers=Headers
