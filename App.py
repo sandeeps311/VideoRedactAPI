@@ -91,7 +91,7 @@ def compare_images():
     except Exception as error:
         print(Errorlines(error))
 
-async def getUniqueface(videopath):
+def getUniqueface(videopath):
 
     try:
         vs = cv2.VideoCapture(videopath)
@@ -228,7 +228,7 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
 
-    await getUniqueface(f'Media/{file.filename}')
+    getUniqueface(f'Media/{file.filename}')
     
     uploadBlobToAWS(path, user_id, videoid)
 
