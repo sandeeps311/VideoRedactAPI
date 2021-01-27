@@ -84,7 +84,7 @@ def compare_images():
     except Exception as error:
         print(error)
 
-def getUniqueface(videopath):
+async def getUniqueface(videopath):
 
     try:
         vs = cv2.VideoCapture(videopath)
