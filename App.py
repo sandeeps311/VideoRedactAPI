@@ -208,7 +208,7 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
 
-    getUniqueface(f'Media/{file.filename}')
+    await getUniqueface(f'Media/{file.filename}')
 
     try:
         s3.upload_file(path, 'original-video', user_id + f'/video/{videoid}/{file.filename}')
