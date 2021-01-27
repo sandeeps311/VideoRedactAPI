@@ -166,6 +166,13 @@ async def create_upload_file(file: UploadFile = File(...),user_id: str = Form(..
                       aws_access_key_id=Aws_access_key_id,
                       aws_secret_access_key=Aws_secret_access_key,
                       )
+    
+    try:
+        if os.path.exists( 'Media'):
+            print( 'find Media' )
+        else:
+            os.makedirs( 'Media' )
+    except:pass
 
     path = f"Media/{file.filename}"
     #
