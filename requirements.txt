@@ -1,4 +1,5 @@
 python-multipart
+dlib
 bleedfacedetector
 boto3
 opencv-python
