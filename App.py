@@ -164,7 +164,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
         print('go ahead')
 
     try:
-        s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{file.filename}')
+        s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{videofilename}')
     # except Exception as e:
     #     print(e)
     # try:
