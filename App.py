@@ -6,7 +6,7 @@ import bleedfacedetector as fd
 import boto3
 import cv2
 import face_recognition
-import requests
+import requests, sys
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 
