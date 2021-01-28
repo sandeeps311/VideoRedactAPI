@@ -198,9 +198,6 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
         os.remove( path )
 
 
-# def uploadBlobToAWS(path, user_id, videoid):
-    
-        
 @app.get("/")
 def read_root():
     return {"Hello": "This is home"}
@@ -496,18 +493,18 @@ async def get_video_data(user_id: str, video_id: str):
                       )
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
-    message = ""
-    response_data = {}
+    # message = ""
+    # response_data = {}
 
-    while message == None or message == "" or message == "Video uploading":
+    # while message == None or message == "" or message == "Video uploading":
         # time.sleep(2)
-        response_data = requests.get(
-            f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
-            headers=Headers
-        )
-        response_data = json.loads(response_data.text)
+    response_data = requests.get(
+        f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
+        headers=Headers
+    )
+    response_data = json.loads(response_data.text)
 
-        message = response_data['response'][0]['message']
+    message = response_data['response'][0]['message']
 
     videoID = response_data['response'][0]['video_id']
     videoName = response_data['response'][0]['video_name']
