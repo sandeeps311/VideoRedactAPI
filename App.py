@@ -559,10 +559,14 @@ async def download_redacted_video(item: models.downloadVideo):
                       )
 
 
-    video_url = s3.generate_presigned_url(
-        ClientMethod='get_object',
-        Params={'Bucket': 'redacted-video', 'Key': f'{item.user_id}/video/{item.video_id}/{item.video_name}'},
-        ExpiresIn=3600,
-    )
+    try:
+        video_url = s3.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={'Bucket': 'redacted-video', 'Key': f'{item.user_id}/video/{item.video_id}/{item.video_name}'},
+            ExpiresIn=3600,
+        )
+    except:
+        video_url = ''
+
 
     return {'video_url': video_url}
