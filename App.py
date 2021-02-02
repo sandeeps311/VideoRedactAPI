@@ -9,7 +9,7 @@ import face_recognition
 import requests, sys
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-
+from models import models
 
 
 
