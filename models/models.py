@@ -8,3 +8,8 @@ class detectfaceitem(BaseModel):
 
 class redactfaceitem(BaseModel):
     data: str
+
+class downloadVideo(BaseModel):
+    user_id: str
+    video_id: str
+    video_name: str
