@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 class CredItem(BaseModel):
@@ -9,7 +11,22 @@ class detectfaceitem(BaseModel):
 class redactfaceitem(BaseModel):
     data: str
 
+class Image_URL(BaseModel):
+    url: str
+
 class downloadVideo(BaseModel):
     user_id: str
     video_id: str
     video_name: str
+    video_url:str
+    image_url:List[Image_URL]
+    readctiontype: str
+    level_simple:str
+    level_pixelate: str
+
+
+
+
+
+
+
