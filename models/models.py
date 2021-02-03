@@ -13,3 +13,4 @@ class downloadVideo(BaseModel):
     user_id: str
     video_id: str
     video_name: str
+    bucket_name: str
