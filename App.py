@@ -542,6 +542,7 @@ async def get_video_data(user_id: str, video_id: str):
     data = response_data['response'][0]
     data['video_url'] = video_url
     data['faces'] = faces_list
+    data['transcription'] = []
 
     return data
 
