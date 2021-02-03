@@ -516,6 +516,7 @@ async def get_video_data(user_id: str, video_id: str):
         ExpiresIn=3600,
     )
     List_object = s3.list_objects( Bucket='original-video', Prefix=f'{user_id}/faces/{videoID}/' )
+    print(List_object)
 
     if 'Contents' in List_object:
         # print('%###################################################3')
@@ -531,20 +532,20 @@ async def get_video_data(user_id: str, video_id: str):
                 ExpiresIn=3600,
             )
             
-            starttime = str(item['Key']).split('.')[0]
-            starttime = float(starttime) * 1000
-            starttime = str(starttime).split('.')[0]
+#             starttime = str(item['Key']).split('.')[0]
+#             starttime = float(starttime) * 1000
+#             starttime = str(starttime).split('.')[0]
             
-            endtime = str(item['Key']).split('.')[0] 
-            endtime = float(endtime) * 1000
-            endtime = str(starttime).split('.')[0] 
+#             endtime = str(item['Key']).split('.')[0] 
+#             endtime = float(endtime) * 1000
+#             endtime = str(starttime).split('.')[0] 
             
             faces_list.append(
                 {
                     "faceName": item['Key'],
                     "object": face_url,
-                    "starttime": starttime,
-                    "endtime": endtime,
+                    "starttime": 0,
+                    "endtime": 11000,
                     "auto": True,
                     "Manual": False
                 }
