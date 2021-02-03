@@ -11,3 +11,4 @@ pydantic
 gunicorn
 uvloop
 moviepy
+SpeechRecognition
