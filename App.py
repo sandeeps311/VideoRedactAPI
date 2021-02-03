@@ -530,11 +530,19 @@ async def get_video_data(user_id: str, video_id: str):
                 Params={'Bucket': 'original-video', 'Key': item['Key']},
                 ExpiresIn=3600,
             )
+            
+            starttime = float(item['Key']) * 1000
+            starttime = str(starttime).split('.')[0]
+            
+            endtime = float(item['Key']) * 1000
+            endtime = str(starttime).split('.')[0] 
+            
             faces_list.append(
                 {
+                    "faceName": item['Key'],
                     "object": face_url,
-                    "starttime": 0,
-                    "endtime": 19000,
+                    "starttime": starttime,
+                    "endtime": endtime,
                     "auto": True,
                     "Manual": False
                 }
