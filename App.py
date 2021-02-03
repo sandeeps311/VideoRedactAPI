@@ -533,11 +533,11 @@ async def get_video_data(user_id: str, video_id: str):
             )
             
             starttime = str(item['Key']).split('/')[3].split('.')[0]
-            starttime = float(starttime) * 1000
+            starttime = float(starttime) * 100
             starttime = str(starttime).split('.')[0]
             
             endtime = str(item['Key']).split('/')[3].split('.')[0]
-            endtime = float(endtime) * 1000
+            endtime = float(endtime) * 100
             endtime = str(starttime).split('.')[0] 
             
             faces_list.append(
