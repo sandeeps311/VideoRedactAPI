@@ -531,9 +531,11 @@ async def get_video_data(user_id: str, video_id: str):
                 ExpiresIn=3600,
             )
             
+            starttime = str(starttime).split('.')[0]
             starttime = float(item['Key']) * 1000
             starttime = str(starttime).split('.')[0]
             
+            endtime = str(starttime).split('.')[0] 
             endtime = float(item['Key']) * 1000
             endtime = str(starttime).split('.')[0] 
             
