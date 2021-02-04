@@ -106,7 +106,7 @@ def compare_images():
         print( Errorlines( error ) )
 
 
-def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
+def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_id):
     # try:
     #     s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{videofilename}')
     # except Exception as e:
@@ -187,8 +187,8 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
             s3.upload_file( f'Media/unique/{images}', 'original-video', user_id + f'/faces/{video_id}/{images}' )
 
         body = {
-            "data_id": 68,
             "video_id": video_id,
+            "agency_id": agency_id,
             "message": "Video upload success"
         }
         headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
@@ -198,8 +198,8 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename):
     except Exception as e:
         print( e )
         body = {
-            "data_id": 68,
             "video_id": video_id,
+            "agency_id": agency_id,
             "message": "Video upload error"
         }
         headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
@@ -219,7 +219,7 @@ def read_root():
 
 @app.post( "/uploadfile" )
 async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File( ... ),
-                             user_id: str = Form( ... )):
+                             user_id: str = Form( ... ), agency_id : str = Form( ... )):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
 
@@ -242,9 +242,9 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
         shutil.copyfileobj( file.file, buffer )
 
     body = {
-        "data_id": 68,
         "video_name": file.filename,
         "video_url": "response_url",
+        "agency_id": agency_id,
         "message": "Video uploading"
     }
     headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
@@ -271,7 +271,7 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/video/{videoid}') )
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
-    background_tasks.add_task( getUniqueface, f'Media/{file.filename}', user_id, videoid, path, s3, file.filename )
+    background_tasks.add_task( getUniqueface, f'Media/{file.filename}', user_id, videoid, path, s3, file.filename, agency_id )
 
     #     uploadBlobToAWS(path, user_id, videoid)
 
