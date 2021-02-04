@@ -571,6 +571,7 @@ async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEdi
     background_tasks.add_task( read_video, item )
     body = {
         "data_id": 68,
+        "video_id":item.video_id,
         "redact_video_name": item.video_name,
         "redact_video_url": "response_url",
         "message": "Redacted video uploading"
