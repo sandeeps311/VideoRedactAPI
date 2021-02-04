@@ -592,9 +592,7 @@ async def get_video_data(user_id: str, video_id: str):
 async def download_redacted_video(item: models.downloadRedactedVideo):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
-    # bucketName = 'original-video'
-    #
-    # region = 'us-east-2'
+    
     s3 = boto3.client( 's3',
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
