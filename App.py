@@ -68,6 +68,7 @@ def get_uniqueimage():
 
 def compare_images():
     i = 0
+    print(i)
     try:
         for img in os.listdir( r"Media/faces" ):
             try:
