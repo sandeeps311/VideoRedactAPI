@@ -531,8 +531,8 @@ def read_video(item,s3):
             # break
         except Exception as e:
             print( e )
-            vs.release()
-            cv2.destroyAllWindows()
+#             vs.release()
+#             cv2.destroyAllWindows()
 
             # video_stream = ffmpeg.input( f'Media/{item.video_name}.mp4' )
             # audio_stream = ffmpeg.input( 'test.wav' )
