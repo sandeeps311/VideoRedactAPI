@@ -14,7 +14,7 @@ class redactfaceitem(BaseModel):
 class Image_URL(BaseModel):
     url: str
 
-class downloadVideo(BaseModel):
+class getEditedVideo(BaseModel):
     user_id: str
     video_id: str
     video_name: str
@@ -24,11 +24,20 @@ class downloadVideo(BaseModel):
     level_simple:str
     level_pixelate: str
 
-class downloadRedactedVideo(BaseModel):
+class downloadVideo(BaseModel):
     user_id: str
     video_id: str
     video_name: str
-    bucket_name: str
+    bucket_name:str
+
+
+
+
+
+
+
+
+
 
 
 
