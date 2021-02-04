@@ -597,7 +597,7 @@ async def download_redacted_video(item: models.downloadRedactedVideo):
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
-
+    #this is new
     try:
         video_url = s3.generate_presigned_url(
             ClientMethod='get_object',
