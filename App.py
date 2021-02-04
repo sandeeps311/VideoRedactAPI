@@ -589,7 +589,7 @@ async def get_video_data(user_id: str, video_id: str):
 
 
 @app.post( '/downloadRedactedVideo' )
-async def download_redacted_video(item: models.downloadVideo):
+async def download_redacted_video(item: models.downloadRedactedVideo):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
     # bucketName = 'original-video'
@@ -603,7 +603,7 @@ async def download_redacted_video(item: models.downloadVideo):
     try:
         video_url = s3.generate_presigned_url(
             ClientMethod='get_object',
-            Params={'Bucket': 'redacted-video', 'Key': f'{item.user_id}/video/{item.video_id}/{item.video_name}'},
+            Params={'Bucket': item.bucket_name, 'Key': f'{item.user_id}/video/{item.video_id}/{item.video_name}'},
             ExpiresIn=3600,
         )
     except:
