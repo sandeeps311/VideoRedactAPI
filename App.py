@@ -492,7 +492,7 @@ def read_video(item):
                 frametime = count / fps
                 if writer is None:
                     fourcc = cv2.VideoWriter_fourcc( *"MP4V" )
-                    writer = cv2.VideoWriter( f'Media/Converted.mp4', fourcc, 20,
+                    writer = cv2.VideoWriter( 'Media/Converted.mp4', fourcc, 20,
                                               (frame.shape[1], frame.shape[0]), True )
                     # if the writer is not None, write the frame with recognized
                     # faces to disk
@@ -513,7 +513,7 @@ def read_video(item):
 
             try:
 
-                s3.upload_file( f'Media/{item.video_name}.mp4', 'redacted-video',
+                s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
                                 item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
                 body = {
@@ -539,7 +539,7 @@ def read_video(item):
             # ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
             # combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
             try:
-                s3.upload_file( f'Media/{item.video_name}.mp4', 'redacted-video',
+                s3.upload_file('Media/Converted.mp4', 'redacted-video',
                                 item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
                 body = {
