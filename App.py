@@ -33,6 +33,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+try:
+        if os.path.exists( 'Media' ):
+            print( 'find' )
+        else:
+            os.makedirs( 'Media' )
+    except:
+        pass
 
 def Errorlines(error): 
     exc_type, exc_obj, exc_tb = sys.exc_info()
