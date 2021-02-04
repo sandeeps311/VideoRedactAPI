@@ -41,7 +41,7 @@ try:
 except:
     pass
 
-def Errorlines(error): 
+def Errorlines(error):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split( exc_tb.tb_frame.f_code.co_filename )[1]
     error = "Exception occured :- " + str( error ) + str(
@@ -409,7 +409,7 @@ async def download_redacted_video(item: models.downloadVideo):
 #     audio_background = mpe.AudioFileClip( audname )
 #     final_clip = my_clip.set_audio( audio_background )
 #     final_clip.write_videofile( outname, fps=fps )
-def read_video(item):
+def read_video(item,s3):
         vs = cv2.VideoCapture( f'Media/{item.video_name}' )
         # else:
         # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
@@ -518,15 +518,15 @@ def read_video(item):
 
                 body = {
                     "data_id": 68,
-                    "video_id": video_id,
+                    "video_id": item.video_id,
                     "message": "Reacted Video upload success"
                 }
                 headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
                                       headers=headers )
                 print( data.text )
-            except:
-                print( 'file not uploded' )
+            except Exception as er:
+                print( er, 'file not uploded1' )
 
             # break
         except Exception as e:
@@ -544,15 +544,15 @@ def read_video(item):
 
                 body = {
                     "data_id": 68,
-                    "video_id": video_id,
+                    "video_id": item.video_id,
                     "message": "Reacted Video upload success"
                 }
                 headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
                                       headers=headers )
                 print( data.text )
-            except:
-                print( 'file not uploded' )
+            except Exception as er:
+                print( er,'file not uploded' )
 
 
 
@@ -568,7 +568,7 @@ async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEdi
     with open( f'Media/{item.video_name}', 'wb' ) as f:
         s3.download_fileobj( 'original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', f )
         f.close()
-    background_tasks.add_task( read_video, item )
+    background_tasks.add_task( read_video, item,s3 )
     body = {
         "data_id": 68,
         "video_id":item.video_id,
