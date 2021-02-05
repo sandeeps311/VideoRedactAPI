@@ -511,22 +511,22 @@ def read_video(item,s3):
 
             # combine_audio( f'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}', fps=25 )
 
-            try:
+#             try:
 
-                s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
-                                item.user_id + f'/video/{item.video_id}/{item.video_name}' )
+#                 s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
+#                                 item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
-                body = {
-                    "data_id": 68,
-                    "video_id": item.video_id,
-                    "message": "Reacted Video upload success"
-                }
-                headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
-                                      headers=headers )
-                print( data.text )
-            except Exception as er:
-                print( er, 'file not uploded1' )
+#                 body = {
+#                     "data_id": 68,
+#                     "video_id": item.video_id,
+#                     "message": "Reacted Video upload success"
+#                 }
+#                 headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+#                 data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
+#                                       headers=headers )
+#                 print( data.text )
+#             except Exception as er:
+#                 print( er, 'file not uploded1' )
 
             # break
         except Exception as e:
@@ -538,21 +538,7 @@ def read_video(item,s3):
             # audio_stream = ffmpeg.input( 'test.wav' )
             # ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
             # combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
-            try:
-                s3.upload_file('Media/Converted.mp4', 'redacted-video',
-                                item.user_id + f'/video/{item.video_id}/{item.video_name}' )
-
-                body = {
-                    "data_id": 68,
-                    "video_id": item.video_id,
-                    "message": "Reacted Video upload success"
-                }
-                headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-                data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
-                                      headers=headers )
-                print( data.text )
-            except Exception as er:
-                print( er,'file not uploded' )
+            
 
 
 
@@ -598,6 +584,26 @@ async def getRedactedVideoData(user_id: str, video_id: str):
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
+    
+    
+    try:
+        print('uploading in progress')
+        s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
+                        user_id + f'/video/{video_id}/Converted.mp4' )
+
+        body = {
+            "data_id": 68,
+            "video_id": video_id,
+            "message": "Reacted Video upload success"
+        }
+        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+                              headers=headers )
+        print( data.text )
+    except Exception as er:
+        print( er, 'file not uploded' )
+    shutil.rmtree( 'Media/redacted')
+    
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
     # message = ""
