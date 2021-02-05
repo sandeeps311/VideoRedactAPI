@@ -196,7 +196,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
                               headers=headers )
         print( data.text )
     except Exception as e:
-        print( e )
+        print( Errorlines(e) )
         body = {
             "video_id": video_id,
             "agency_id": agency_id,
