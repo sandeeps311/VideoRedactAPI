@@ -410,7 +410,7 @@ async def download_redacted_video(item: models.downloadVideo):
 #     final_clip = my_clip.set_audio( audio_background )
 #     final_clip.write_videofile( outname, fps=fps )
 
-async def processVideo(item,s3):
+async def processVideo(item):
     vs = cv2.VideoCapture( f'Media/{item.video_name}' )
     # else:
     # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
@@ -536,8 +536,8 @@ async def processVideo(item,s3):
         return False
 
 
-def read_video(item, s3):
-    result = await processVideo(item, s3)
+async def read_video(item, s3):
+    result = await processVideo(item)
 
     print(f'Video Redacted {result}')
 
