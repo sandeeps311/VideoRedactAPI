@@ -573,8 +573,11 @@ async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEdi
     # for img in os.listdir( r'D:\VideoRedactAPI\videos' ):
         # if h==0:
 
-@app.get( '/getRedactedVideoData/{user_id}' )
-async def getRedactedVideoData(user_id: str, video_id: str):
+        
+
+        
+@app.get( '/uploadRedactedVideo/{user_id}' )
+async def uploadRedactedVideo(user_id: str, video_id: str):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
     # bucketName = 'original-video'
@@ -604,6 +607,43 @@ async def getRedactedVideoData(user_id: str, video_id: str):
         print( er, 'file not uploded' )
     if os.path.exists('Media/redacted'):
         shutil.rmtree( 'Media/redacted')
+        
+    response_redacted = json.loads( data.text )
+
+    return response_redacted
+
+
+@app.get( '/getRedactedVideoData/{user_id}' )
+async def getRedactedVideoData(user_id: str, video_id: str):
+    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
+    Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
+    # bucketName = 'original-video'
+    #
+    # region = 'us-east-2'
+    s3 = boto3.client( 's3',
+                       aws_access_key_id=Aws_access_key_id,
+                       aws_secret_access_key=Aws_secret_access_key,
+                       )
+    
+    
+#     try:
+#         print('uploading in progress')
+#         s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
+#                         user_id + f'/video/{video_id}/Converted.mp4' )
+
+#         body = {
+#             "data_id": 68,
+#             "video_id": video_id,
+#             "message": "Reacted Video upload success"
+#         }
+#         headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+#         data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
+#                               headers=headers )
+#         print( data.text )
+#     except Exception as er:
+#         print( er, 'file not uploded' )
+#     if os.path.exists('Media/redacted'):
+#         shutil.rmtree( 'Media/redacted')
     
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
