@@ -7,7 +7,6 @@ import cv2
 import face_recognition
 import requests, sys
 import shutil
-
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
@@ -40,6 +39,7 @@ try:
 except:
     pass
 
+
 def Errorlines(error):
     exc_type, exc_obj, exc_tb = sys.exc_info()
     fname = os.path.split( exc_tb.tb_frame.f_code.co_filename )[1]
@@ -65,18 +65,17 @@ def get_uniqueimage():
                 print( subdir )
                 os.rename( subdir + '/' + data, r'Media/unique/' + data )
                 break
-                # if 'unique' not in str(subdir):
-                #     shutil.rmtree(subdir)
-                #     break
-
-
+    return True
 def compare_images():
     i = 0
+    if not os.path.exists( 'Media/converted' ):
+        os.mkdir( 'Media/converted' )
+        print( 'created in Media/converted' )
     try:
         for img in os.listdir( r"Media/faces" ):
             try:
                 knownface = face_recognition.load_image_file( r"Media/faces/" + img )
-                print( 'new loop started' )
+
                 try:
                     person_face_encoding = face_recognition.face_encodings( knownface )[0]
                     for image in os.listdir( r'Media/faces' ):
@@ -86,8 +85,6 @@ def compare_images():
                         except:
                             continue
                         results = face_recognition.compare_faces( [person_face_encoding], face_encodings )
-                        if not os.path.exists( 'Media/converted' ):
-                            os.mkdir( 'Media/converted' )
                         if os.path.exists( 'Media/converted/' + str( i ) ):
                             print( 'sub dir in Media/converted' )
                         else:
@@ -95,7 +92,8 @@ def compare_images():
                         if results[0] == True:
                             os.rename( 'Media/faces/' + image, r'Media/converted/' + str( i ) + '/' + image )
                 except Exception as error:
-                    print( Errorlines( error ) )
+
+                    # print( Errorlines( error ) )
 
                     i = i + 1
                     continue
@@ -103,13 +101,8 @@ def compare_images():
                 print( Errorlines( error ) )
     except Exception as error:
         print( Errorlines( error ) )
-
-
-def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_id):
-    # try:
-    #     s3.upload_file(videopath, 'original-video', user_id + f'/video/{video_id}/{videofilename}')
-    # except Exception as e:
-    #     print(e)
+    return 'True'
+async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_id):
     try:
         vs = cv2.VideoCapture( videopath )
 
@@ -118,6 +111,8 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
         seconds = int( frame_number / fps )
         print( seconds )
         count = 0
+        if not os.path.exists( 'Media/faces' ):
+            os.mkdir( 'Media/faces' )
 
         while 1:
             start_time = time.time()
@@ -141,8 +136,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
                     # print( faces )
-                    if not os.path.exists( 'Media/faces' ):
-                        os.mkdir( 'Media/faces' )
+
                     cv2.imwrite( f'Media/faces/{str( frametime )}.png', crop_img )
                     # cv2.waitKey( 1 )
                     # if 'simple' == "simple":
@@ -151,7 +145,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
                     # img[y:y + h, x:x + w] = face
                     # cv2.putText(img,'Face Detected',(x,y+h+15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2, cv2.LINE_AA)
                 except Exception as error:
-                    print( Errorlines( error ) )
+                    # print( Errorlines( error ) )
                     continue
             count += 5  # i.e. at 30 fps, this advances one second
             vs.set( 1, count )
@@ -166,12 +160,16 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
 
     except Exception as e:
         print( Errorlines( e ) )
-    compare_images()
+    result_compare_images = compare_images()
+    print(result_compare_images)
     try:
         shutil.rmtree( 'Media/faces' )
     except:
         print( 'go ahead' )
-    get_uniqueimage()
+
+    result_get_uniqueimage = get_uniqueimage()
+    print(result_get_uniqueimage)
+
     try:
         shutil.rmtree( 'Media/converted' )
     except:
@@ -195,7 +193,7 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
                               headers=headers )
         print( data.text )
     except Exception as e:
-        print( Errorlines(e) )
+        print( Errorlines( e ) )
         body = {
             "video_id": video_id,
             "agency_id": agency_id,
@@ -207,18 +205,17 @@ def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_
         print( data.text )
 
     shutil.rmtree( 'Media/unique' )
-    if os.path.exists( path ):
-        os.remove( path )
+    # if os.path.exists( path ):
+    #     os.remove( path )
 
 
 @app.get( "/" )
 def read_root():
     return {"Hello": "This is home"}
 
-
 @app.post( "/uploadfile" )
 async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File( ... ),
-                             user_id: str = Form( ... ), agency_id : str = Form( ... )):
+                             user_id: str = Form( ... ), agency_id: str = Form( ... )):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
 
@@ -226,15 +223,14 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
-
     try:
         if os.path.exists( 'Media' ):
-            print( 'find Media' )
+            print( 'Media folder found' )
         else:
             os.makedirs( 'Media' )
+            print("Media Folder created")
     except:
         pass
-
     path = f"Media/{file.filename}"
     #
     with open( path, "wb" ) as buffer:
@@ -251,9 +247,6 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
                           headers=headers )
     print( data.text )
     response_op = json.loads( data.text )
-    # getUniqueface(path)
-    # if os.path.exists( path ):
-    #     os.remove( path )
     bucket = s3.list_objects( Bucket='original-video' )
 
     bucket_name = 'original-video'
@@ -270,7 +263,8 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/video/{videoid}') )
     s3.put_object( Bucket=bucket_name, Key=(user_id + f'/faces/{videoid}') )
 
-    background_tasks.add_task( getUniqueface, f'Media/{file.filename}', user_id, videoid, path, s3, file.filename, agency_id )
+    background_tasks.add_task( getUniqueface, f'Media/{file.filename}', user_id, videoid, path, s3, file.filename,
+                               agency_id )
 
     #     uploadBlobToAWS(path, user_id, videoid)
 
@@ -281,25 +275,23 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
     return videoData
 
 
-
 @app.get( '/getVideoData/{user_id}' )
 async def get_video_data(user_id: str, video_id: str):
+    try:
+        if os.path.exists( 'Media' ):
+            print( 'Media folder found' )
+        else:
+            os.makedirs( 'Media' )
+            print("Media Folder created")
+    except:
+        pass
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
-    # bucketName = 'original-video'
-    #
-    # region = 'us-east-2'
     s3 = boto3.client( 's3',
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-
-    # message = ""
-    # response_data = {}
-
-    # while message == None or message == "" or message == "Video uploading":
-    # time.sleep(2)
     response_data = requests.get(
         f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
         headers=Headers
@@ -320,13 +312,7 @@ async def get_video_data(user_id: str, video_id: str):
     List_object = s3.list_objects( Bucket='original-video', Prefix=f'{user_id}/faces/{videoID}/' )
 
     if 'Contents' in List_object:
-        # print('%###################################################3')
-        # print(List_object['Contents'])
-        # print( '%###################################################3' )
         for item in List_object['Contents']:
-            # print( '%###################################################3' )
-            # print(item)
-            # print( '%###################################################3' )
             face_url = s3.generate_presigned_url(
                 ClientMethod='get_object',
                 Params={'Bucket': 'original-video', 'Key': item['Key']},
@@ -353,17 +339,10 @@ async def get_video_data(user_id: str, video_id: str):
     data = response_data['response'][0]
     data['video_url'] = video_url
     data['faces'] = faces_list
-
-    ffmpeg_extract_audio( video_url, "test.wav", bitrate=3000, fps=44100 )
-    framerate = 0.1
+    ffmpeg_extract_audio( f'Media/{videoName}', "test.wav", bitrate=3000, fps=44100 )
     r = sr.Recognizer()
     with sr.AudioFile( "test.wav" ) as source:
-        # reads the audio file. Here we use record instead of
-        # listen
         audio = r.record( source )
-        # decoder = r.recognize_sphinx(audio, show_all=False)
-        #
-        # print([(seg.word, seg.start_frame / framerate) for seg in decoder.seg()])
     try:
         print( "The audio file contains: " + r.recognize_google( audio ) )
         transcript = r.recognize_google( audio )
@@ -374,7 +353,8 @@ async def get_video_data(user_id: str, video_id: str):
     except sr.RequestError as e:
         print( f"Could not request results from Google Speech Recognition service; {e}" )
         data['transcript'] = f"Could not request results from Google Speech Recognition service; {e}"
-
+    if os.path.exists( f'Media/{videoName}' ):
+        os.remove( f'Media/{videoName}' )
     return data
 
 
@@ -382,9 +362,6 @@ async def get_video_data(user_id: str, video_id: str):
 async def download_redacted_video(item: models.downloadVideo):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
-    # bucketName = 'original-video'
-    #
-    # region = 'us-east-2'
     s3 = boto3.client( 's3',
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
@@ -409,7 +386,7 @@ async def download_redacted_video(item: models.downloadVideo):
 #     final_clip = my_clip.set_audio( audio_background )
 #     final_clip.write_videofile( outname, fps=fps )
 
-async def processVideo(item):
+def processVideo(item):
     vs = cv2.VideoCapture( f'Media/{item.video_name}' )
     # else:
     # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
@@ -509,51 +486,55 @@ async def processVideo(item):
         vs.release()
         cv2.destroyAllWindows()
 
-        # combine_audio( f'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}', fps=25 )
-        return True
+        return fps
 
-#             try:
 
-#                 s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
-#                                 item.user_id + f'/video/{item.video_id}/{item.video_name}' )
-
-#                 body = {
-#                     "data_id": 68,
-#                     "video_id": item.video_id,
-#                     "message": "Reacted Video upload success"
-#                 }
-#                 headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-#                 data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
-#                                       headers=headers )
-#                 print( data.text )
-#             except Exception as er:
-#                 print( er, 'file not uploded1' )
-
-        # break
     except Exception as e:
         print( e )
         return False
 
 
 async def read_video(item, s3):
-    result = await processVideo(item)
+    result = processVideo( item )
 
-    print(f'Video Redacted {result}')
+    vs = cv2.VideoCapture(f'Media/{item.video_name}' )
+    print(item.video_name)
+    fps = int( vs.get( cv2.CAP_PROP_FPS ) )
+    print(fps)
+    vs.release()
+
+    ffmpeg_extract_audio( f'Media/{item.video_name}', 'Media/audio.wav', bitrate=3000, fps=4400 )
+    # import moviepy.editor as mp
+    # my_clip = mp.VideoFileClip( f'Media/{item.video_name}' )
+    # my_clip.audio.write_audiofile( 'Media/audio.wav', fps=fps )
+
+
+
+    def combine_audio(vidname, audname, outname, fps):
+        import moviepy.editor as mpe
+        my_clip = mpe.VideoFileClip( vidname )
+        audio_background = mpe.AudioFileClip( audname )
+        final_clip = my_clip.set_audio( audio_background )
+        final_clip.write_videofile( outname, fps=fps )
+
+    combine_audio( f'Media/Converted.mp4', 'Media/audio.wav', 'Media/Audio_video.mp4', fps )
+
+    print( f'Video Redacted {result}' )
 
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
     # bucketName = 'original-video'
     #
     # region = 'us-east-2'
-    s3 = boto3.client('s3',
-                      aws_access_key_id=Aws_access_key_id,
-                      aws_secret_access_key=Aws_secret_access_key,
-                      )
+    s3 = boto3.client( 's3',
+                       aws_access_key_id=Aws_access_key_id,
+                       aws_secret_access_key=Aws_secret_access_key,
+                       )
 
     try:
-        print('uploading in progress')
-        s3.upload_file('Media/Converted.mp4', 'redacted-video',
-                       item.user_id + f'/video/{item.video_id}/Converted.mp4')
+        print( 'uploading in progress' )
+        s3.upload_file( 'Media/Audio_video.mp4', 'redacted-video',
+                        item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
         body = {
             "data_id": 68,
@@ -561,43 +542,40 @@ async def read_video(item, s3):
             "message": "Reacted Video upload success"
         }
         headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-        data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
-                             headers=headers)
-        print(data.text)
+        data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
+                              headers=headers )
+        print( data.text )
     except Exception as er:
-        print(er, 'file not uploded')
-    if os.path.exists('Media/redacted'):
-        shutil.rmtree('Media/redacted')
-
+        print( er, 'file not uploded' )
+    if os.path.exists( 'Media' ):
+        shutil.rmtree( 'Media' )
 
 
 #             vs.release()
 #             cv2.destroyAllWindows()
 
-        # video_stream = ffmpeg.input( f'Media/{item.video_name}.mp4' )
-        # audio_stream = ffmpeg.input( 'test.wav' )
-        # ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
-        # combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
-            
-
+# video_stream = ffmpeg.input( f'Media/{item.video_name}.mp4' )
+# audio_stream = ffmpeg.input( 'test.wav' )
+# ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
+# combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
 
 
 @app.post( '/getEditedVideo' )
-async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEditedVideo):
+async def get_edited_video(background_tasks: BackgroundTasks, item: models.getEditedVideo):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
     s3 = boto3.client( 's3',
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
-    print(f'Media/{item.video_name}')
+    print( f'Media/{item.video_name}' )
     with open( f'Media/{item.video_name}', 'wb' ) as f:
         s3.download_fileobj( 'original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', f )
         f.close()
-    background_tasks.add_task( read_video, item,s3 )
+    background_tasks.add_task( read_video, item, s3 )
     body = {
         "data_id": 68,
-        "video_id":item.video_id,
+        "video_id": item.video_id,
         "redact_video_name": item.video_name,
         "redact_video_url": "response_url",
         "message": "Redacted video uploading"
@@ -609,11 +587,9 @@ async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEdi
     response_redacted = json.loads( data.text )
 
     return response_redacted
-        # h = 0
+    # h = 0
     # for img in os.listdir( r'D:\VideoRedactAPI\videos' ):
-        # if h==0:
-
-
+    # if h==0:
 
 
 @app.get( '/getRedactedVideoData/{user_id}' )
@@ -627,7 +603,7 @@ async def getRedactedVideoData(user_id: str, video_id: str):
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
-    
+
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
     response_redact_data = requests.get(
@@ -642,14 +618,14 @@ async def getRedactedVideoData(user_id: str, video_id: str):
     if message != 'Redacted video uploading':
 
         video_redcated_url = s3.generate_presigned_url(
-                ClientMethod='get_object',
-                Params={'Bucket': 'redacted-video', 'Key': f'{user_id}/video/{video_id}/{videoName}'},
-                ExpiresIn=3600,
-            )
-        data={"redacted_url":video_redcated_url,
-              "video_name":videoName,
-              "video_upload_dt": video_upload_dt
-              }
+            ClientMethod='get_object',
+            Params={'Bucket': 'redacted-video', 'Key': f'{user_id}/video/{video_id}/{videoName}'},
+            ExpiresIn=3600,
+        )
+        data = {"redacted_url": video_redcated_url,
+                "video_name": videoName,
+                "video_upload_dt": video_upload_dt
+                }
     else:
         data = {"redacted_url": 'video_redcated_url',
                 "video_name": videoName,
