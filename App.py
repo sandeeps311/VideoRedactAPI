@@ -602,7 +602,8 @@ async def getRedactedVideoData(user_id: str, video_id: str):
         print( data.text )
     except Exception as er:
         print( er, 'file not uploded' )
-    shutil.rmtree( 'Media/redacted')
+    if os.path.exists('Media/redacted'):
+        shutil.rmtree( 'Media/redacted')
     
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
