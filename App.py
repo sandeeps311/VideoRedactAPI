@@ -409,107 +409,109 @@ async def download_redacted_video(item: models.downloadVideo):
 #     audio_background = mpe.AudioFileClip( audname )
 #     final_clip = my_clip.set_audio( audio_background )
 #     final_clip.write_videofile( outname, fps=fps )
-def read_video(item,s3):
-        vs = cv2.VideoCapture( f'Media/{item.video_name}' )
-        # else:
-        # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
-        #
-        # print( data[0] )
-        # os.rename(f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}',f'D:\VideoRedactAPI\VideoRedactAPI\Media\{item.video_name}' )
-        # vs = cv2.VideoCapture( f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}' )
-        # print( data[0] )
 
-        frame_number = vs.get( cv2.CAP_PROP_FRAME_COUNT )
-        fps = int( vs.get( cv2.CAP_PROP_FPS ) )
-        seconds = int( frame_number / fps )
-        print( seconds )
-        count = 0
-        writer = None
-        # Load a sample picture and learn how to recognize it.
-        # listofimages = item.image_url
-        # print( listofimages )
-        i = 0
+async def processVideo(item,s3):
+    vs = cv2.VideoCapture( f'Media/{item.video_name}' )
+    # else:
+    # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
+    #
+    # print( data[0] )
+    # os.rename(f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}',f'D:\VideoRedactAPI\VideoRedactAPI\Media\{item.video_name}' )
+    # vs = cv2.VideoCapture( f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}' )
+    # print( data[0] )
 
-        # print( img )
+    frame_number = vs.get( cv2.CAP_PROP_FRAME_COUNT )
+    fps = int( vs.get( cv2.CAP_PROP_FPS ) )
+    seconds = int( frame_number / fps )
+    print( seconds )
+    count = 0
+    writer = None
+    # Load a sample picture and learn how to recognize it.
+    # listofimages = item.image_url
+    # print( listofimages )
+    i = 0
 
-        # knownface = face_recognition.load_image_file( f'D:/VideoRedactAPI/videos/{img}' )
-        # knownface_encoding = face_recognition.face_encodings( knownface )[0]
-        #
-        # known_face_encodings = [
-        #     knownface_encoding
-        # ]
+    # print( img )
 
-        # Initialize some variables
-        face_locations = []
-        face_encodings = []
-        face_names = []
-        process_this_frame = True
-        try:
-            while True:
-                # Grab a single frame of video
-                ret, frame = vs.read()
-                faces = fd.ssd_detect( frame )
+    # knownface = face_recognition.load_image_file( f'D:/VideoRedactAPI/videos/{img}' )
+    # knownface_encoding = face_recognition.face_encodings( knownface )[0]
+    #
+    # known_face_encodings = [
+    #     knownface_encoding
+    # ]
 
-                for (x, y, w, h) in faces:
-                    try:
-                        # image = np.uint8( faces )
-                        count += 1  # i.e. at 30 fps, this advances one second
-                        vs.set( 1, count )
+    # Initialize some variables
+    face_locations = []
+    face_encodings = []
+    face_names = []
+    process_this_frame = True
+    try:
+        while True:
+            # Grab a single frame of video
+            ret, frame = vs.read()
+            faces = fd.ssd_detect( frame )
 
-                        # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
-                        crop_img = frame[y:y + h, x:x + w]
+            for (x, y, w, h) in faces:
+                try:
+                    # image = np.uint8( faces )
+                    count += 1  # i.e. at 30 fps, this advances one second
+                    vs.set( 1, count )
 
-                        # try:
-                        #     unknown_encoding = face_recognition.face_encodings( crop_img )[0]
-                        # except:
-                        #     continue
-                        # matches = face_recognition.compare_faces( known_face_encodings, unknown_encoding )
-                        # face_distances = face_recognition.face_distance( known_face_encodings, unknown_encoding )
+                    # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
+                    crop_img = frame[y:y + h, x:x + w]
 
-                        # if face_distances >.50:
-                        #     print( 'face distance',+face_distances )
-                        #     print( 'matched' )
-                        # cv2.rectangle( frameq, (x-40, y-50), (x + w, y + h), (0, 0, 255), 2 )
-                        # redcationtype='simple'
-                        if item.readctiontype == "simple":
-                            face = anonymize_face_simple( crop_img, factor=float( item.level_simple ) )
-                            # cv2.imshow('test',face)
-                            # cv2.waitKey(1)
+                    # try:
+                    #     unknown_encoding = face_recognition.face_encodings( crop_img )[0]
+                    # except:
+                    #     continue
+                    # matches = face_recognition.compare_faces( known_face_encodings, unknown_encoding )
+                    # face_distances = face_recognition.face_distance( known_face_encodings, unknown_encoding )
 
-                        elif item.readctiontype == 'pixelate':
-
-                            face = anonymize_face_pixelate( crop_img,
-                                                            blocks=int( item.level_pixelate ) )
-                        # cv2.imshow('tes',crop_img)
-                        frame[y:y + h, x:x + w] = face
+                    # if face_distances >.50:
+                    #     print( 'face distance',+face_distances )
+                    #     print( 'matched' )
+                    # cv2.rectangle( frameq, (x-40, y-50), (x + w, y + h), (0, 0, 255), 2 )
+                    # redcationtype='simple'
+                    if item.readctiontype == "simple":
+                        face = anonymize_face_simple( crop_img, factor=float( item.level_simple ) )
+                        # cv2.imshow('test',face)
                         # cv2.waitKey(1)
 
+                    elif item.readctiontype == 'pixelate':
 
-                    except:
-                        continue
-                count += 1  # i.e. at 30 fps, this advances one second
-                vs.set( 1, count )
-                frametime = count / fps
-                if writer is None:
-                    fourcc = cv2.VideoWriter_fourcc( *"MP4V" )
-                    writer = cv2.VideoWriter( 'Media/Converted.mp4', fourcc, 20,
-                                              (frame.shape[1], frame.shape[0]), True )
-                    # if the writer is not None, write the frame with recognized
-                    # faces to disk
-                if writer is not None:
-                    writer.write( frame )
+                        face = anonymize_face_pixelate( crop_img,
+                                                        blocks=int( item.level_pixelate ) )
+                    # cv2.imshow('tes',crop_img)
+                    frame[y:y + h, x:x + w] = face
+                    # cv2.waitKey(1)
 
+
+                except:
+                    continue
+            count += 1  # i.e. at 30 fps, this advances one second
+            vs.set( 1, count )
+            frametime = count / fps
+            if writer is None:
+                fourcc = cv2.VideoWriter_fourcc( *"MP4V" )
+                writer = cv2.VideoWriter( 'Media/Converted.mp4', fourcc, 20,
+                                          (frame.shape[1], frame.shape[0]), True )
+                # if the writer is not None, write the frame with recognized
+                # faces to disk
+            if writer is not None:
                 writer.write( frame )
-                # cv2.imshow( 'Video', frame )
-                # cv2.waitKey( 1 )
 
-                # Hit 'q' on the keyboard to quit!
-                # if cv2.waitKey( 1 ) & 0xFF == ord( 'q' ):
-                #     break
-            vs.release()
-            cv2.destroyAllWindows()
+            writer.write( frame )
+            # cv2.imshow( 'Video', frame )
+            # cv2.waitKey( 1 )
 
-            # combine_audio( f'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}', fps=25 )
+            # Hit 'q' on the keyboard to quit!
+            # if cv2.waitKey( 1 ) & 0xFF == ord( 'q' ):
+            #     break
+        vs.release()
+        cv2.destroyAllWindows()
+
+        # combine_audio( f'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}', fps=25 )
+        return True
 
 #             try:
 
@@ -528,16 +530,55 @@ def read_video(item,s3):
 #             except Exception as er:
 #                 print( er, 'file not uploded1' )
 
-            # break
-        except Exception as e:
-            print( e )
+        # break
+    except Exception as e:
+        print( e )
+        return False
+
+
+def read_video(item, s3):
+    result = await processVideo(item, s3)
+
+    print(f'Video Redacted {result}')
+
+    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
+    Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
+    # bucketName = 'original-video'
+    #
+    # region = 'us-east-2'
+    s3 = boto3.client('s3',
+                      aws_access_key_id=Aws_access_key_id,
+                      aws_secret_access_key=Aws_secret_access_key,
+                      )
+
+    try:
+        print('uploading in progress')
+        s3.upload_file('Media/Converted.mp4', 'redacted-video',
+                       item.user_id + f'/video/{item.video_id}/Converted.mp4')
+
+        body = {
+            "data_id": 68,
+            "video_id": item.video_id,
+            "message": "Reacted Video upload success"
+        }
+        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        data = requests.post(f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
+                             headers=headers)
+        print(data.text)
+    except Exception as er:
+        print(er, 'file not uploded')
+    if os.path.exists('Media/redacted'):
+        shutil.rmtree('Media/redacted')
+
+
+
 #             vs.release()
 #             cv2.destroyAllWindows()
 
-            # video_stream = ffmpeg.input( f'Media/{item.video_name}.mp4' )
-            # audio_stream = ffmpeg.input( 'test.wav' )
-            # ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
-            # combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
+        # video_stream = ffmpeg.input( f'Media/{item.video_name}.mp4' )
+        # audio_stream = ffmpeg.input( 'test.wav' )
+        # ffmpeg.output( audio_stream, video_stream, 'out.mp4' ).run()
+        # combine_audio( 'Media/Converted.mp4', 'test.wav', f'Media/{item.video_name}.mp4', fps=25 )
             
 
 
@@ -573,44 +614,7 @@ async def get_edited_video(background_tasks: BackgroundTasks,item: models.getEdi
     # for img in os.listdir( r'D:\VideoRedactAPI\videos' ):
         # if h==0:
 
-        
 
-        
-@app.get( '/uploadRedactedVideo/{user_id}' )
-async def uploadRedactedVideo(user_id: str, video_id: str):
-    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
-    Aws_secret_access_key = '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'
-    # bucketName = 'original-video'
-    #
-    # region = 'us-east-2'
-    s3 = boto3.client( 's3',
-                       aws_access_key_id=Aws_access_key_id,
-                       aws_secret_access_key=Aws_secret_access_key,
-                       )
-    
-    
-    try:
-        print('uploading in progress')
-        s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
-                        user_id + f'/video/{video_id}/Converted.mp4' )
-
-        body = {
-            "data_id": 68,
-            "video_id": video_id,
-            "message": "Reacted Video upload success"
-        }
-        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-        data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
-                              headers=headers )
-        print( data.text )
-    except Exception as er:
-        print( er, 'file not uploded' )
-    if os.path.exists('Media/redacted'):
-        shutil.rmtree( 'Media/redacted')
-        
-    response_redacted = json.loads( data.text )
-
-    return response_redacted
 
 
 @app.get( '/getRedactedVideoData/{user_id}' )
@@ -625,33 +629,8 @@ async def getRedactedVideoData(user_id: str, video_id: str):
                        aws_secret_access_key=Aws_secret_access_key,
                        )
     
-    
-#     try:
-#         print('uploading in progress')
-#         s3.upload_file( 'Media/Converted.mp4', 'redacted-video',
-#                         user_id + f'/video/{video_id}/Converted.mp4' )
-
-#         body = {
-#             "data_id": 68,
-#             "video_id": video_id,
-#             "message": "Reacted Video upload success"
-#         }
-#         headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
-#         data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
-#                               headers=headers )
-#         print( data.text )
-#     except Exception as er:
-#         print( er, 'file not uploded' )
-#     if os.path.exists('Media/redacted'):
-#         shutil.rmtree( 'Media/redacted')
-    
     Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
 
-    # message = ""
-    # response_data = {}
-
-    # while message == None or message == "" or message == "Video uploading":
-    # time.sleep(2)
     response_redact_data = requests.get(
         f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
         headers=Headers
