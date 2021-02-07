@@ -336,6 +336,9 @@ async def get_video_data(user_id: str, video_id: str):
                     "Manual": False
                 }
             )
+            
+    with open(f'Media/{videoName}', 'wb') as data:
+        s3.download_fileobj('original-video', f'{user_id}/video/{videoID}/{videoName}', data)
     data = response_data['response'][0]
     data['video_url'] = video_url
     data['faces'] = faces_list
