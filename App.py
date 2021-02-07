@@ -136,6 +136,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
                     # print( faces )
+                    crop_img = cv2.resize(crop_img, (36, 44), interpolation=cv2.INTER_AREA)
 
                     cv2.imwrite( f'Media/faces/{str( frametime )}.png', crop_img )
                     # cv2.waitKey( 1 )
