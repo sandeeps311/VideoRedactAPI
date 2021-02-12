@@ -33,7 +33,7 @@ app.add_middleware(
 
 try:
     if os.path.exists( 'Media' ):
-        print( 'find' )
+        print( 'find1' )
     else:
         os.makedirs( 'Media' )
 except:
