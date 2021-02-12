@@ -105,7 +105,7 @@ def compare_images():
         print( Errorlines( error ) )
     return 'True'
 
-abc = "abc"
+abc = "22"
 
 
 async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_id):
