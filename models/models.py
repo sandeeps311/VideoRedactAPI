@@ -13,6 +13,8 @@ class redactfaceitem(BaseModel):
 
 class Image_URL(BaseModel):
     url: str
+    imagename:str
+
 
 class getEditedVideo(BaseModel):
     user_id: str
@@ -23,6 +25,7 @@ class getEditedVideo(BaseModel):
     readctiontype: str
     level_simple:str
     level_pixelate: str
+
 
 class downloadVideo(BaseModel):
     user_id: str
