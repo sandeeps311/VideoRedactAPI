@@ -387,12 +387,6 @@ async def download_redacted_video(item: models.downloadVideo):
     return {'video_url': video_url}
 
 
-# def combine_audio(vidname, audname, outname, fps=25):
-#     import moviepy.editor as mpe
-#     my_clip = mpe.VideoFileClip( vidname )
-#     audio_background = mpe.AudioFileClip( audname )
-#     final_clip = my_clip.set_audio( audio_background )
-#     final_clip.write_videofile( outname, fps=fps )
 video_flag = 'AWS'
 
 
