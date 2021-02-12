@@ -7,6 +7,8 @@ import cv2
 import face_recognition
 import requests, sys
 import shutil
+
+import uvicorn
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
@@ -66,6 +68,8 @@ def get_uniqueimage():
                 os.rename( subdir + '/' + data, r'Media/unique/' + data )
                 break
     return True
+
+
 def compare_images():
     i = 0
     if not os.path.exists( 'Media/converted' ):
@@ -102,6 +106,8 @@ def compare_images():
     except Exception as error:
         print( Errorlines( error ) )
     return 'True'
+
+
 async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, agency_id):
     try:
         vs = cv2.VideoCapture( videopath )
@@ -136,7 +142,6 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
                     # print( faces )
-                    crop_img = cv2.resize(crop_img, (36, 44), interpolation=cv2.INTER_AREA)
 
                     cv2.imwrite( f'Media/faces/{str( frametime )}.png', crop_img )
                     # cv2.waitKey( 1 )
@@ -162,14 +167,14 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
     except Exception as e:
         print( Errorlines( e ) )
     result_compare_images = compare_images()
-    print(result_compare_images)
+    print( result_compare_images )
     try:
         shutil.rmtree( 'Media/faces' )
     except:
         print( 'go ahead' )
 
     result_get_uniqueimage = get_uniqueimage()
-    print(result_get_uniqueimage)
+    print( result_get_uniqueimage )
 
     try:
         shutil.rmtree( 'Media/converted' )
@@ -189,7 +194,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
             "agency_id": agency_id,
             "message": "Video upload success"
         }
-        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
         data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
                               headers=headers )
         print( data.text )
@@ -200,7 +205,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
             "agency_id": agency_id,
             "message": "Video upload error"
         }
-        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
         data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{user_id}', data=body,
                               headers=headers )
         print( data.text )
@@ -213,6 +218,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
 @app.get( "/" )
 def read_root():
     return {"Hello": "This is home"}
+
 
 @app.post( "/uploadfile" )
 async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File( ... ),
@@ -229,7 +235,7 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
             print( 'Media folder found' )
         else:
             os.makedirs( 'Media' )
-            print("Media Folder created")
+            print( "Media Folder created" )
     except:
         pass
     path = f"Media/{file.filename}"
@@ -243,7 +249,7 @@ async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile
         "agency_id": agency_id,
         "message": "Video uploading"
     }
-    headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+    headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
     data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/add_video/{user_id}', data=body,
                           headers=headers )
     print( data.text )
@@ -283,7 +289,7 @@ async def get_video_data(user_id: str, video_id: str):
             print( 'Media folder found' )
         else:
             os.makedirs( 'Media' )
-            print("Media Folder created")
+            print( "Media Folder created" )
     except:
         pass
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
@@ -292,7 +298,7 @@ async def get_video_data(user_id: str, video_id: str):
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
-    Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+    Headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
     response_data = requests.get(
         f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
         headers=Headers
@@ -337,9 +343,9 @@ async def get_video_data(user_id: str, video_id: str):
                     "Manual": False
                 }
             )
-            
-    with open(f'Media/{videoName}', 'wb') as data:
-        s3.download_fileobj('original-video', f'{user_id}/video/{videoID}/{videoName}', data)
+
+    with open( f'Media/{videoName}', 'wb' ) as data:
+        s3.download_fileobj( 'original-video', f'{user_id}/video/{videoID}/{videoName}', data )
     data = response_data['response'][0]
     data['video_url'] = video_url
     data['faces'] = faces_list
@@ -357,8 +363,8 @@ async def get_video_data(user_id: str, video_id: str):
     except sr.RequestError as e:
         print( f"Could not request results from Google Speech Recognition service; {e}" )
         data['transcript'] = f"Could not request results from Google Speech Recognition service; {e}"
-    if os.path.exists( f'Media/{videoName}' ):
-        os.remove( f'Media/{videoName}' )
+    # if os.path.exists( f'Media/{videoName}' ):
+    #     os.remove( f'Media/{videoName}' )
     return data
 
 
@@ -389,110 +395,188 @@ async def download_redacted_video(item: models.downloadVideo):
 #     audio_background = mpe.AudioFileClip( audname )
 #     final_clip = my_clip.set_audio( audio_background )
 #     final_clip.write_videofile( outname, fps=fps )
+video_flag = 'AWS'
+
 
 def processVideo(item):
-    vs = cv2.VideoCapture( f'Media/{item.video_name}' )
-    # else:
-    # data =os.listdir('D:\VideoRedactAPI\VideoRedactAPI\Media')
-    #
-    # print( data[0] )
-    # os.rename(f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}',f'D:\VideoRedactAPI\VideoRedactAPI\Media\{item.video_name}' )
-    # vs = cv2.VideoCapture( f'D:\VideoRedactAPI\VideoRedactAPI\Media\{data[0]}' )
-    # print( data[0] )
+    if not os.path.exists( 'images' ):
+        os.makedirs( 'images' )
+    # user_id + f'/faces/{video_id}/{images}'
 
-    frame_number = vs.get( cv2.CAP_PROP_FRAME_COUNT )
-    fps = int( vs.get( cv2.CAP_PROP_FPS ) )
-    seconds = int( frame_number / fps )
-    print( seconds )
-    count = 0
-    writer = None
-    # Load a sample picture and learn how to recognize it.
-    # listofimages = item.image_url
-    # print( listofimages )
-    i = 0
+    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
+    Aws_secret_access_key = '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'
+    region = 'us-east-2'
+    s3 = boto3.client( 'rekognition',
+                       aws_access_key_id=Aws_access_key_id,
+                       aws_secret_access_key=Aws_secret_access_key, region_name='us-east-2' )
 
-    # print( img )
+    s4 = boto3.client( 's3',
+                       aws_access_key_id=Aws_access_key_id,
+                       aws_secret_access_key=Aws_secret_access_key, region_name='us-east-2' )
 
-    # knownface = face_recognition.load_image_file( f'D:/VideoRedactAPI/videos/{img}' )
-    # knownface_encoding = face_recognition.face_encodings( knownface )[0]
-    #
-    # known_face_encodings = [
-    #     knownface_encoding
-    # ]
-
-    # Initialize some variables
-    face_locations = []
-    face_encodings = []
-    face_names = []
-    process_this_frame = True
     try:
-        while True:
-            # Grab a single frame of video
-            ret, frame = vs.read()
-            faces = fd.ssd_detect( frame )
+        t = 0
+        for images1 in item.image_url:
+            imagepath = item.user_id + f'/faces/{item.video_id}/{images1.imagename}'
+            with open( f'images/{images1.imagename}', 'wb' ) as data:
+                s4.download_fileobj( 'original-video', imagepath, data )
 
-            for (x, y, w, h) in faces:
-                try:
-                    # image = np.uint8( faces )
+        for images in os.listdir( 'images' ):
+            t = t + 1
+            files = os.listdir( f'Media' )
+            vs = cv2.VideoCapture( f'Media/{files[0]}' )
+            print( f'Media/{files[0]}' )
+            if video_flag == 'AWS':
+                # with open( images ) as file:
+                with open( f'images/{images}', 'rb' ) as file:
+                    fimage = file.read()
+
+            if video_flag == 'Inhouse':
+                knownface = face_recognition.load_image_file( images )
+                knownface_encoding = face_recognition.face_encodings( knownface )[0]
+
+                known_face_encodings = [
+                    knownface_encoding
+                ]
+
+            frame_number = vs.get( cv2.CAP_PROP_FRAME_COUNT )
+            fps = int( vs.get( cv2.CAP_PROP_FPS ) )
+            seconds = int( frame_number / fps )
+            print( seconds )
+            count = 0
+            writer = None
+            i = 0
+            process_this_frame = True
+            try:
+                while True:
+                    # Grab a single frame of video
+                    ret, frame = vs.read()
+                    if ret == True:
+                        # print(ret,frame)
+                        faces = fd.ssd_detect( frame )
+
+                        for (x, y, w, h) in faces:
+                            try:
+                                # image = np.uint8( faces )
+                                count += 1  # i.e. at 30 fps, this advances one second
+                                vs.set( 1, count )
+
+                                # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
+                                crop_img = frame[y:y + h, x:x + w]
+
+                                # if video_flag == 'Inhouse':
+                                #     try:
+                                #         unknown_encoding = face_recognition.face_encodings( crop_img )[0]
+                                #     except:
+                                #         continue
+                                #     matches = face_recognition.compare_faces( known_face_encodings, unknown_encoding )
+                                #     face_distances = face_recognition.face_distance( known_face_encodings,
+                                #                                                      unknown_encoding )
+                                #     if True in matches:
+                                #         if "simple" == "simple":
+                                #             face = anonymize_face_simple( crop_img, factor=float( 1 ) )
+                                #
+                                #
+                                #         elif "simple" == 'pixelate':
+                                #
+                                #             face = anonymize_face_pixelate( crop_img,
+                                #                                             blocks=int( 5 ) )
+
+                                # if video_flag == 'AWS':
+                                is_success, im_buf_arr = cv2.imencode( ".jpg", crop_img )
+
+                                byte_im = im_buf_arr.tobytes()
+
+                                # simage = open( byte_im, 'rb')
+
+                                # try:
+                                print('respose send')
+                                response = s3.compare_faces( SimilarityThreshold=80,
+                                                             SourceImage={'Bytes': fimage},
+                                                             TargetImage={'Bytes': byte_im} )
+
+                                i = i + 1
+                                print( i )
+                                # print( response )
+                                if len( response['FaceMatches'] ) == 0:
+                                    match = False
+                                else:
+                                    for faceMatch in response['FaceMatches']:
+                                        position = faceMatch['Face']['BoundingBox']
+                                        # print(position)
+                                        similarity = str( faceMatch['Similarity'] )
+                                        print( 'The face at' )
+                                    match = True
+                                if match == True:
+                                    if "simple" == "simple":
+                                        face = anonymize_face_simple( crop_img, factor=float( 1 ) )
+                                        frame[y:y + h, x:x + w] = face
+
+
+                                    elif "simple" == 'pixelate':
+
+                                        face = anonymize_face_pixelate( crop_img,
+                                                                        blocks=int( 5 ) )
+
+
+                                # cv2.rectangle( frameq, (x-40, y-50), (x + w, y + h), (0, 0, 255), 2 )
+
+
+                                # cv2.waitKey(1)
+
+
+
+                            except Exception as error:
+                                print( Errorlines( error ) )
+                                continue
+                    if ret==False:
+
+                        print('No frmae')
+                    # else:
+                    #     print( 'false' )
+
                     count += 1  # i.e. at 30 fps, this advances one second
                     vs.set( 1, count )
+                    frametime = count / fps
+                    # print(frametime)
+                    # cv2.imshow( 'test', frame )
+                    # cv2.waitKey( 1 )
+                    # count += 1  # i.e. at 30 fps, this advances one second
+                    # vs.set( 1, count )
 
-                    # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
-                    crop_img = frame[y:y + h, x:x + w]
+                    if writer is None:
+                        fourcc = cv2.VideoWriter_fourcc( *"MP4V" )
+                        writer = cv2.VideoWriter( f'Media/Converted{t}.mp4', fourcc, 20,
+                                                  (frame.shape[1], frame.shape[0]), True )
 
-                    # try:
-                    #     unknown_encoding = face_recognition.face_encodings( crop_img )[0]
-                    # except:
-                    #     continue
-                    # matches = face_recognition.compare_faces( known_face_encodings, unknown_encoding )
-                    # face_distances = face_recognition.face_distance( known_face_encodings, unknown_encoding )
+                        # faces to disk
+                    if writer is not None:
+                        writer.write( frame )
 
-                    # if face_distances >.50:
-                    #     print( 'face distance',+face_distances )
-                    #     print( 'matched' )
-                    # cv2.rectangle( frameq, (x-40, y-50), (x + w, y + h), (0, 0, 255), 2 )
-                    # redcationtype='simple'
-                    if item.readctiontype == "simple":
-                        face = anonymize_face_simple( crop_img, factor=float( item.level_simple ) )
-                        # cv2.imshow('test',face)
-                        # cv2.waitKey(1)
+                    writer.write( frame )
+                    # cv2.imshow( 'Video', frame )
+                    # cv2.waitKey( 1 )
 
-                    elif item.readctiontype == 'pixelate':
+                    # Hit 'q' on the keyboard to quit!
+                    # if cv2.waitKey( 1 ) & 0xFF == ord( 'q' ):
+                    #     break
+                vs.release()
+                writer.release()
+                cv2.destroyAllWindows()
 
-                        face = anonymize_face_pixelate( crop_img,
-                                                        blocks=int( item.level_pixelate ) )
-                    # cv2.imshow('tes',crop_img)
-                    frame[y:y + h, x:x + w] = face
-                    # cv2.waitKey(1)
+                if os.path.exists( f'Media/{files[0]}' ):
+                        os.remove( f'Media/{files[0]}' )
 
-
-                except:
-                    continue
-            count += 1  # i.e. at 30 fps, this advances one second
-            vs.set( 1, count )
-            frametime = count / fps
-            if writer is None:
-                fourcc = cv2.VideoWriter_fourcc( *"MP4V" )
-                writer = cv2.VideoWriter( 'Media/Converted.mp4', fourcc, 20,
-                                          (frame.shape[1], frame.shape[0]), True )
-                # if the writer is not None, write the frame with recognized
-                # faces to disk
-            if writer is not None:
-                writer.write( frame )
-
-            writer.write( frame )
-            # cv2.imshow( 'Video', frame )
-            # cv2.waitKey( 1 )
-
-            # Hit 'q' on the keyboard to quit!
-            # if cv2.waitKey( 1 ) & 0xFF == ord( 'q' ):
-            #     break
-        vs.release()
-        cv2.destroyAllWindows()
-
-        return fps
+            except Exception as error:
+                print( error )
+                writer.release()
+                vs.release()
+                cv2.destroyAllWindows()
+                if os.path.exists( f'Media/{files[0]}' ):
+                    os.remove( f'Media/{files[0]}' )
 
 
+            return fps
     except Exception as e:
         print( e )
         return False
@@ -500,28 +584,43 @@ def processVideo(item):
 
 async def read_video(item, s3):
     result = processVideo( item )
+    print( result )
 
-    vs = cv2.VideoCapture(f'Media/{item.video_name}' )
-    print(item.video_name)
+    vs = cv2.VideoCapture( f'Media/{item.video_name}' )
+    print( item.video_name )
     fps = int( vs.get( cv2.CAP_PROP_FPS ) )
-    print(fps)
+    print( fps )
     vs.release()
 
-    ffmpeg_extract_audio( f'Media/{item.video_name}', 'Media/audio.wav', bitrate=3000, fps=4400 )
+
+    videos=os.listdir('Media')
+    try:
+        if os.path.exists( 'original' ):
+            print( 'find' )
+        else:
+            os.makedirs( 'original' )
+    except:
+        pass
+    with open( f'original/{item.video_name}', 'wb' ) as data:
+        s3.download_fileobj( 'original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', data )
+
+    ffmpeg_extract_audio( f'original/{item.video_name}', 'Media/audio.wav', bitrate=3000, fps=4400 )
+
+
     # import moviepy.editor as mp
     # my_clip = mp.VideoFileClip( f'Media/{item.video_name}' )
     # my_clip.audio.write_audiofile( 'Media/audio.wav', fps=fps )
-
-
-
+    print( videos[0] )
+    print(fps)
     def combine_audio(vidname, audname, outname, fps):
         import moviepy.editor as mpe
         my_clip = mpe.VideoFileClip( vidname )
         audio_background = mpe.AudioFileClip( audname )
         final_clip = my_clip.set_audio( audio_background )
-        final_clip.write_videofile( outname, fps=fps )
+        final_clip.write_videofile( outname )
 
-    combine_audio( f'Media/Converted.mp4', 'Media/audio.wav', 'Media/Audio_video.mp4', fps )
+    print(f'Media/{str(videos[0])}')
+    combine_audio( f'Media/{str(videos[0])}', 'Media/audio.wav', 'Media/Audio_video.mp4', fps )
 
     print( f'Video Redacted {result}' )
 
@@ -545,7 +644,7 @@ async def read_video(item, s3):
             "video_id": item.video_id,
             "message": "Reacted Video upload success"
         }
-        headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+        headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
         data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
                               headers=headers )
         print( data.text )
@@ -553,6 +652,11 @@ async def read_video(item, s3):
         print( er, 'file not uploded' )
     if os.path.exists( 'Media' ):
         shutil.rmtree( 'Media' )
+
+
+
+    if os.path.exists( 'images' ):
+        shutil.rmtree( 'images' )
 
 
 #             vs.release()
@@ -573,9 +677,9 @@ async def get_edited_video(background_tasks: BackgroundTasks, item: models.getEd
                        aws_secret_access_key=Aws_secret_access_key,
                        )
     print( f'Media/{item.video_name}' )
-    with open( f'Media/{item.video_name}', 'wb' ) as f:
-        s3.download_fileobj( 'original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', f )
-        f.close()
+    # with open( f'Media/{item.video_name}', 'wb' ) as f:
+    #     s3.download_fileobj( 'original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', f )
+    #     f.close()
     background_tasks.add_task( read_video, item, s3 )
     body = {
         "data_id": 68,
@@ -584,7 +688,7 @@ async def get_edited_video(background_tasks: BackgroundTasks, item: models.getEd
         "redact_video_url": "response_url",
         "message": "Redacted video uploading"
     }
-    headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+    headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
     data = requests.post( f'http://63.142.254.143/GovQuest/api/Redactions/edit_video/{item.user_id}', data=body,
                           headers=headers )
     print( data.text )
@@ -603,12 +707,14 @@ async def getRedactedVideoData(user_id: str, video_id: str):
     # bucketName = 'original-video'
     #
     # region = 'us-east-2'
+    if os.path.exists( 'original' ):
+        shutil.rmtree( 'original' )
     s3 = boto3.client( 's3',
                        aws_access_key_id=Aws_access_key_id,
                        aws_secret_access_key=Aws_secret_access_key,
                        )
 
-    Headers = {"x-api-key": "3loi6egfa0g04kgwg884oo88sgccgockg0o"}
+    Headers = {"x-api-key": "7cl9xcwysls8g8040wgks8gk4o0k0k8cgg8"}
 
     response_redact_data = requests.get(
         f'http://63.142.254.143/GovQuest/api/Redactions/video_details/{video_id}',
@@ -637,3 +743,8 @@ async def getRedactedVideoData(user_id: str, video_id: str):
                 }
 
     return data
+
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
