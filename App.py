@@ -523,9 +523,7 @@ def processVideo(item):
                             except Exception as error:
                                 print( Errorlines( error ) )
                                 continue
-                    if ret==False:
-                        print('No frmae')
-                        break
+                    
                     # else:
                     #     print( 'false' )
 
@@ -548,6 +546,10 @@ def processVideo(item):
                         writer.write( frame )
 
                     writer.write( frame )
+                    
+                    if ret==False:
+                        print('No frmae')
+                        break
                     # cv2.imshow( 'Video', frame )
                     # cv2.waitKey( 1 )
 
