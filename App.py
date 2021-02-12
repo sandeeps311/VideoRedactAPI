@@ -524,8 +524,8 @@ def processVideo(item):
                                 print( Errorlines( error ) )
                                 continue
                     if ret==False:
-
                         print('No frmae')
+                        break
                     # else:
                     #     print( 'false' )
 
