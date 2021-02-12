@@ -7,12 +7,10 @@ import cv2
 import face_recognition
 import requests, sys
 import shutil
-
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
-
 from FaceDetection.pyimagesearch.face_blurring import anonymize_face_simple, anonymize_face_pixelate
 from models import models
 import speech_recognition as sr
