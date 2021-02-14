@@ -72,7 +72,7 @@ def compare_images():
     i = 0
     if not os.path.exists('Media/converted'):
         os.mkdir('Media/converted')
-        print('created in Media/converted')
+        print('creatded in Media/converted')
     try:
         for img in os.listdir(r"Media/faces"):
             try:
