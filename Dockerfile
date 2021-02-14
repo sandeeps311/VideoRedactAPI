@@ -1,9 +1,12 @@
 FROM python:3.7
 
 ADD requirements.txt /app/requirements.txt
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get install -y ffmpeg
+RUN set -x \
+    && add-apt-repository ppa:mc3man/trusty-media \
+    && apt-get update \
+    && apt-get dist-upgrade \
+    && apt-get install -y --no-install-recommends \
+        ffmpeg \ 
 RUN pip install -r /app/requirements.txt
 
 
