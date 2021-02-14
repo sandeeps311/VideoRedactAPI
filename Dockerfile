@@ -1,12 +1,6 @@
 FROM python:3.8
 
 ADD requirements.txt /app/requirements.txt
-RUN set -x \
-    && add-apt-repository ppa:mc3man/trusty-media \
-    && apt-get update \
-    && apt-get dist-upgrade \
-    && apt-get install -y --no-install-recommends \
-        ffmpeg \ 
 RUN pip install -r /app/requirements.txt
 
 
