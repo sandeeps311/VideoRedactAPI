@@ -222,7 +222,7 @@ def read_root():
 
 
 @app.post("/uploadfile")
-async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...),
+def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...),
                              user_id: str = Form(...), agency_id: str = Form(...)):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
