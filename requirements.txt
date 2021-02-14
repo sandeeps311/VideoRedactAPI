@@ -9,7 +9,7 @@ requests
 uvicorn
 pydantic
 gunicorn
-uvloop
+uvloop==0.13.0
 moviepy
 SpeechRecognition
 ffmpeg-python
