@@ -3,11 +3,11 @@ import os
 import time
 import bleedfacedetector as fd
 import boto3
+import ffmpeg
 import cv2
 import face_recognition
 import requests, sys
 import shutil
-import uvicorn
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
@@ -138,7 +138,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                     # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
                     crop_img = img[y:y + h, x:x + w]
                     # count += 4
-                    count += 3  # i.e. at 30 fps, this advances one second
+                    count += 1  # i.e. at 30 fps, this advances one second
                     vs.set(1, count)
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
@@ -154,7 +154,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                 except Exception as error:
                     # print( Errorlines( error ) )
                     continue
-            count += 3  # i.e. at 30 fps, this advances one second
+            count += 1  # i.e. at 30 fps, this advances one second
             vs.set(1, count)
             fps = (1.0 / (time.time() - start_time))
             # if cv2.waitKey( 1 ) == ord( 'q' ):
@@ -222,7 +222,7 @@ def read_root():
 
 
 @app.post("/uploadfile")
-def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...),
+async def create_upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...),
                              user_id: str = Form(...), agency_id: str = Form(...)):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
@@ -568,7 +568,7 @@ def processVideo(item):
 
         return fps
     except Exception as e:
-        print(e)
+        print(Errorlines(e))
         return False
 
 
@@ -593,7 +593,7 @@ async def read_video(item, s3):
     with open(f'original/{item.video_name}', 'wb') as data:
         s3.download_fileobj('original-video', f'{item.user_id}/video/{item.video_id}/{item.video_name}', data)
 
-    ffmpeg_extract_audio(f'original/{item.video_name}', 'Media/audio.wav', bitrate=3000, fps=4400)
+    # ffmpeg_extract_audio(f'original/{item.video_name}', 'Media/audio.wav', bitrate=3000, fps=4400)
 
     # import moviepy.editor as mp
     # my_clip = mp.VideoFileClip( f'Media/{item.video_name}' )
@@ -601,15 +601,22 @@ async def read_video(item, s3):
     print(videos[0])
     print(fps)
 
-    def combine_audio(vidname, audname, outname, fps):
-        import moviepy.editor as mpe
-        my_clip = mpe.VideoFileClip(vidname)
-        audio_background = mpe.AudioFileClip(audname)
-        final_clip = my_clip.set_audio(audio_background)
-        final_clip.write_videofile(outname)
+    # def combine_audio(vidname, audname, outname, fps):
+    #     import moviepy.editor as mpe
+    #     my_clip = mpe.VideoFileClip(vidname)
+    #     audio_background = mpe.AudioFileClip(audname)
+    #     final_clip = my_clip.set_audio(audio_background)
+    #     final_clip.write_videofile(outname)
 
     print(f'Media/{str(videos[0])}')
-    combine_audio(f'Media/{str(videos[0])}', 'Media/audio.wav', 'Media/Audio_video.mp4', fps)
+
+
+    input_video = ffmpeg.input( f'Media/{str(videos[0])}' )
+
+    input_audio = ffmpeg.input( 'test.wav' )
+
+    ffmpeg.concat( input_video, input_audio, v=1, a=1 ).output( 'Media/Audio_video.mp4' ).run()
+    # combine_audio(f'Media/{str(videos[0])}', 'test.wav', 'Media/Audio_video.mp4', fps)
 
     print(f'Video Redacted {result}')
 
