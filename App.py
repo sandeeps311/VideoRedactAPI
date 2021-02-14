@@ -688,7 +688,7 @@ async def get_edited_video(background_tasks: BackgroundTasks, item: models.getEd
 
 
 @app.get('/getRedactedVideoData/{user_id}')
-async def getRedactedVideoData(user_id: str, video_id: str, video_name:str):
+async def getRedactedVideoData(user_id: str, video_id: str):
     Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
     Aws_secret_access_key = '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'
     # bucketName = 'original-video'
