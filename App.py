@@ -51,7 +51,7 @@ def Errorlines(error):
 def get_uniqueimage():
     try:
         if os.path.exists('Media/unique'):
-            print('find')
+            print('findh')
         else:
             os.makedirs('Media/unique')
     except:
