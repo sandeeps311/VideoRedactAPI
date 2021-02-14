@@ -12,3 +12,4 @@ gunicorn
 uvloop
 moviepy
 SpeechRecognition
+ffmpeg-python
