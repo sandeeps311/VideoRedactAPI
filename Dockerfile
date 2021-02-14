@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8
 
 ADD requirements.txt /app/requirements.txt
 RUN set -x \
