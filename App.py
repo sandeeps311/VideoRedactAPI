@@ -3,11 +3,11 @@ import os
 import time
 import bleedfacedetector as fd
 import boto3
-import ffmpeg
 import cv2
 import face_recognition
 import requests, sys
 import shutil
+import uvicorn
 from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
@@ -138,7 +138,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                     # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
                     crop_img = img[y:y + h, x:x + w]
                     # count += 4
-                    count += 1  # i.e. at 30 fps, this advances one second
+                    count += 2  # i.e. at 30 fps, this advances one second
                     vs.set(1, count)
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
@@ -154,7 +154,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                 except Exception as error:
                     # print( Errorlines( error ) )
                     continue
-            count += 1  # i.e. at 30 fps, this advances one second
+            count += 2  # i.e. at 30 fps, this advances one second
             vs.set(1, count)
             fps = (1.0 / (time.time() - start_time))
             # if cv2.waitKey( 1 ) == ord( 'q' ):
@@ -568,7 +568,7 @@ def processVideo(item):
 
         return fps
     except Exception as e:
-        print(Errorlines(e))
+        print(e)
         return False
 
 
@@ -600,40 +600,46 @@ async def read_video(item, s3):
     # my_clip.audio.write_audiofile( 'Media/audio.wav', fps=fps )
     print(videos[0])
     print(fps)
+    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
+    Aws_secret_access_key = '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'
+    s3 = boto3.client( 's3',
+                       aws_access_key_id=Aws_access_key_id,
+                       aws_secret_access_key=Aws_secret_access_key,
+                       )
 
-    # def combine_audio(vidname, audname, outname, fps):
-    #     import moviepy.editor as mpe
-    #     my_clip = mpe.VideoFileClip(vidname)
-    #     audio_background = mpe.AudioFileClip(audname)
-    #     final_clip = my_clip.set_audio(audio_background)
-    #     final_clip.write_videofile(outname)
+    def combine_audio(vidname, audname, outname, fps):
+        import moviepy.editor as mpe
+        my_clip = mpe.VideoFileClip(vidname)
+        audio_background = mpe.AudioFileClip(audname)
+        final_clip = my_clip.set_audio(audio_background)
+        final_clip.write_videofile(outname)
 
     print(f'Media/{str(videos[0])}')
+    try:
+        combine_audio(f'Media/{str(videos[0])}', 'test.wav', 'Media/Audio_video.mp4', fps)
+
+        print( 'uploading in progress video audio' )
+        s3.upload_file( 'Media/Audio_video.mp4', 'redacted-video',
+                        item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
 
-    input_video = ffmpeg.input( f'Media/{str(videos[0])}' )
+    except:
 
-    input_audio = ffmpeg.input( 'test.wav' )
+        print( 'uploading in progress video' )
+        s3.upload_file( f'Media/{str(videos[0])}', 'redacted-video',
+                        item.user_id + f'/video/{item.video_id}/{item.video_name}' )
 
-    ffmpeg.concat( input_video, input_audio, v=1, a=1 ).output( 'Media/Audio_video.mp4' ).run()
-    # combine_audio(f'Media/{str(videos[0])}', 'test.wav', 'Media/Audio_video.mp4', fps)
 
     print(f'Video Redacted {result}')
 
-    Aws_access_key_id = 'AKIAIFWF3UATSC6JEWBA'
-    Aws_secret_access_key = '4Jd0MizjQFaJJamOuEsGsouEMQOfTLBqWsPeK9L9'
+
     # bucketName = 'original-video'
     #
     # region = 'us-east-2'
-    s3 = boto3.client('s3',
-                      aws_access_key_id=Aws_access_key_id,
-                      aws_secret_access_key=Aws_secret_access_key,
-                      )
+
 
     try:
-        print('uploading in progress')
-        s3.upload_file('Media/Audio_video.mp4', 'redacted-video',
-                       item.user_id + f'/video/{item.video_id}/{item.video_name}')
+
 
         body = {
             "data_id": 68,
