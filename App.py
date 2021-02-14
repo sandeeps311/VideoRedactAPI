@@ -138,7 +138,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                     # cv2.rectangle( img, (x, y), (x + w, y + h), (0, 0, 255), 2 )
                     crop_img = img[y:y + h, x:x + w]
                     # count += 4
-                    count += 1  # i.e. at 30 fps, this advances one second
+                    count += 3  # i.e. at 30 fps, this advances one second
                     vs.set(1, count)
                     frametime = count / fps
                     # print( math.ceil( frametime * 100 ) / 100 )
@@ -154,7 +154,7 @@ async def getUniqueface(videopath, user_id, video_id, path, s3, videofilename, a
                 except Exception as error:
                     # print( Errorlines( error ) )
                     continue
-            count += 1  # i.e. at 30 fps, this advances one second
+            count += 3  # i.e. at 30 fps, this advances one second
             vs.set(1, count)
             fps = (1.0 / (time.time() - start_time))
             # if cv2.waitKey( 1 ) == ord( 'q' ):
